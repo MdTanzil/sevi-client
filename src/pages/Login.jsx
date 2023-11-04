@@ -1,7 +1,53 @@
-import { Link } from "react-router-dom";
-
+/* eslint-disable no-unused-vars */
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
+import useAuth from "../hooks/useAuth";
+import toast from "react-hot-toast";
 
 const Login = () => {
+    const { signUpWithGoogle, login ,setUser} = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation()
+
+    const handleLogin = (event)=>{
+        event.preventDefault();
+        const email = event.target.email.value || ''
+        const password = event.target.password.value ||''
+        login(email, password)
+          .then((userCredential) => {
+            // Signed up
+            const user = userCredential.user;
+            setUser(user)
+            console.log(user);
+            toast.success(user?.email + " Log in success");
+            navigate(location?.state ? location.state : "/");
+            // ...
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            toast.error(errorCode);
+            // ..
+          });
+
+
+    }
+
+
+
+
+
+    //google login
+    const googleClickHandler = () => {
+      signUpWithGoogle()
+        .then(() => {
+          toast.success("Login successful");
+          navigate(location?.state ? location.state : "/");
+        })
+        .catch((error) => {
+          toast.error(error.code);
+        });
+    };
     return (
       <div className="hero min-h-screen bg-base-200">
         <div className="hero-content w-full  ">
@@ -10,7 +56,7 @@ const Login = () => {
               Login now!
             </h1>
 
-            <form className="card-body">
+            <form className="card-body" onSubmit={handleLogin}>
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Email</span>
@@ -18,7 +64,8 @@ const Login = () => {
                 <input
                   type="email"
                   placeholder="email"
-                  className="input input-bordered"
+                  className="input input-bordered focus:input-primary"
+                  name="email"
                   required
                 />
               </div>
@@ -28,8 +75,9 @@ const Login = () => {
                 </label>
                 <input
                   type="password"
+                  name="password"
                   placeholder="password"
-                  className="input input-bordered"
+                  className="input input-bordered focus:input-primary"
                   required
                 />
                 <label className="label">
@@ -39,7 +87,9 @@ const Login = () => {
                 </label>
               </div>
               <div className="form-control mt-6">
-                <button className="btn btn-primary">Login</button>
+                <button className="btn btn-primary" type="submit">
+                  Login
+                </button>
               </div>
             </form>
             <p className="px-4">
@@ -50,7 +100,15 @@ const Login = () => {
                 create account
               </Link>
             </p>
-            <div className="card-body"></div>
+            <div className="card-body">
+              <button
+                className="btn hover:btn-primary"
+                onClick={googleClickHandler}
+              >
+                Sign in with Google
+                <FcGoogle></FcGoogle>
+              </button>
+            </div>
           </div>
         </div>
       </div>

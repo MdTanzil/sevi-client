@@ -3,9 +3,9 @@ import hero from '../assets/hero.png';
 
 const Hero = () => {
     return (
-      <div className="hero min-h-screen bg-base-200">
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <img src={hero} className="max-w-xl rounded-lg shadow-2xl" />
+      <div className="hero min-h-screen ">
+        <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse">
+          <img src={hero} className="max-w-sm lg:max-w-lg rounded-lg shadow-2xl object-cover" />
           <div>
             <h1 className="text-5xl font-bold playfair">
               Today's research, <br /> tomorrow's innovation
@@ -15,10 +15,10 @@ const Hero = () => {
             </p>
             <input
               type="text"
-              placeholder="Search books, articles, keywords"
-              className="input input-bordered w-3/4 input-primary"
+              placeholder="Search books, articles, keywords "
+              className="input input-bordered w-3/4 input-primary placeholder:text-primary"
             />
-            <button className="btn btn-square text-primary">
+            <button className="btn btn-square text-primary ml-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
