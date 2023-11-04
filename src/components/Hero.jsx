@@ -1,18 +1,22 @@
 /* eslint-disable react/no-unescaped-entities */
-import hero from '../assets/hero.png';
+import hero from "../assets/hero.png";
 
 const Hero = () => {
-    return (
-      <div className="hero min-h-screen ">
-        <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse">
-          <img src={hero} className="max-w-sm lg:max-w-lg rounded-lg shadow-2xl object-cover" />
-          <div>
-            <h1 className="text-5xl font-bold playfair">
-              Today's research, <br /> tomorrow's innovation
-            </h1>
-            <p className="py-6">
-              Accelerating research discovery to shape a better future
-            </p>
+  return (
+    <div className="hero min-h-screen ">
+      <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse">
+        <img
+          src={hero}
+          className="max-w-sm lg:max-w-lg rounded-lg shadow-2xl object-cover"
+        />
+        <div>
+          <h1 className="text-5xl font-bold playfair">
+            Today's research, <br /> tomorrow's innovation
+          </h1>
+          <p className="py-6">
+            Accelerating research discovery to shape a better future
+          </p>
+          <div className="flex justify-center ">
             <input
               type="text"
               placeholder="Search books, articles, keywords "
@@ -37,7 +41,8 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
 };
 
 export default Hero;

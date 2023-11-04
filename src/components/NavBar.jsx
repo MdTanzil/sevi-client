@@ -20,13 +20,34 @@ const NavBar = () => {
         </li>
 
         <li>
-          <a>Add Book</a>
+          <NavLink
+            to={"/add-book"}
+            className={({ isActive, isPending }) =>
+              isPending ? "pending" : isActive ? "bg-[#723182] text-white" : ""
+            }
+          >
+            Add Book
+          </NavLink>
         </li>
         <li>
-          <a>All Books</a>
+          <NavLink
+            to={"/all-book"}
+            className={({ isActive, isPending }) =>
+              isPending ? "pending" : isActive ? "bg-[#723182] text-white" : ""
+            }
+          >
+            All Book
+          </NavLink>
         </li>
         <li>
-          <a>Borrowed Books</a>
+          <NavLink
+            to={"/borrowed-book"}
+            className={({ isActive, isPending }) =>
+              isPending ? "pending" : isActive ? "bg-[#723182] text-white" : ""
+            }
+          >
+            Borrowed Book
+          </NavLink>
         </li>
       </>
     );
@@ -170,7 +191,7 @@ logout()
             </>
           )}
           {!user && (
-            <Link to={"/login"} className="btn btn-primary">
+            <Link to={"/login"} className="btn bg-white border-primary border-1 hover:btn-primary">
               Login
             </Link>
           )}
