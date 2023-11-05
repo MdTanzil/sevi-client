@@ -6,40 +6,52 @@ import Register from "../pages/Register";
 import AddBook from "../pages/AddBook";
 import AllBooks from "../pages/AllBooks";
 import BorrowedBooks from "../pages/BorrowedBooks";
+import PrivateRoute from "./PrivateRoute";
 
     const router = createBrowserRouter([
       {
         path: "/",
         element: <MainLayout></MainLayout>,
-        children:[
+        children: [
           {
-            index:true,
-            element:<Home></Home>
+            index: true,
+            element: <Home></Home>,
           },
           {
-            path:'add-book',
-            element: <AddBook></AddBook>
+            path: "add-book",
+            element: (
+              <PrivateRoute>
+                <AddBook></AddBook>
+              </PrivateRoute>
+            ),
           },
-          
-          {
-            path:'all-book',
-            element: <AllBooks></AllBooks>
-          },
-          {
-            path:'borrowed-book',
-            element: <BorrowedBooks></BorrowedBooks>
-          }
-        ]
 
+          {
+            path: "all-book",
+            element: (
+              <PrivateRoute>
+                <AllBooks></AllBooks>,
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "borrowed-book",
+            element: (
+              <PrivateRoute>
+                <BorrowedBooks></BorrowedBooks>,
+              </PrivateRoute>
+            ),
+          },
+        ],
       },
       {
-        path:'/login',
-        element: <Login></Login>
+        path: "/login",
+        element: <Login></Login>,
       },
       {
-        path:'/register',
-        element: <Register></Register>
-      }
+        path: "/register",
+        element: <Register></Register>,
+      },
     ]);
 
 export default router;
