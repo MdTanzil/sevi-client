@@ -32,6 +32,7 @@ const AuthProvider = ({ children }) => {
         // User is signed out
         // ...
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -56,6 +57,7 @@ const AuthProvider = ({ children }) => {
   };
   // update user data
   const updateUserData = (displayName, url) => {
+    setLoading(false)
     return updateProfile(auth.currentUser, {
       displayName: displayName,
       photoURL: url,
@@ -66,6 +68,7 @@ const AuthProvider = ({ children }) => {
   // sign up with google popup
   const googleProvider = new GoogleAuthProvider();
   const signUpWithGoogle = ()=>{
+    setLoading(false)
     return signInWithPopup(auth, googleProvider);
   }
 

@@ -7,51 +7,60 @@ import AddBook from "../pages/AddBook";
 import AllBooks from "../pages/AllBooks";
 import BorrowedBooks from "../pages/BorrowedBooks";
 import PrivateRoute from "./PrivateRoute";
+import BooksAllCategory from "../pages/BooksAllCategory";
 
-    const router = createBrowserRouter([
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout></MainLayout>,
+    children: [
       {
-        path: "/",
-        element: <MainLayout></MainLayout>,
-        children: [
-          {
-            index: true,
-            element: <Home></Home>,
-          },
-          {
-            path: "add-book",
-            element: (
-              <PrivateRoute>
-                <AddBook></AddBook>
-              </PrivateRoute>
-            ),
-          },
+        index: true,
+        element: <Home></Home>,
+      },
+      {
+        path: "add-book",
+        element: (
+          <PrivateRoute>
+            <AddBook></AddBook>
+          </PrivateRoute>
+        ),
+      },
 
-          {
-            path: "all-book",
-            element: (
-              <PrivateRoute>
-                <AllBooks></AllBooks>,
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "borrowed-book",
-            element: (
-              <PrivateRoute>
-                <BorrowedBooks></BorrowedBooks>,
-              </PrivateRoute>
-            ),
-          },
-        ],
+      {
+        path: "all-book",
+        element: (
+          <PrivateRoute>
+            <AllBooks></AllBooks>,
+          </PrivateRoute>
+        ),
       },
       {
-        path: "/login",
-        element: <Login></Login>,
+        path: "borrowed-book",
+        element: (
+          <PrivateRoute>
+            <BorrowedBooks></BorrowedBooks>,
+          </PrivateRoute>
+        ),
       },
       {
-        path: "/register",
-        element: <Register></Register>,
+        path: "books-category/:category",
+        element: (
+          <PrivateRoute>
+            <BooksAllCategory></BooksAllCategory>
+          </PrivateRoute>
+        ),
       },
-    ]);
+    ],
+  },
+  {
+    path: "/login",
+    element: <Login></Login>,
+  },
+  {
+    path: "/register",
+    element: <Register></Register>,
+  },
+]);
 
 export default router;
