@@ -8,6 +8,8 @@ import AllBooks from "../pages/AllBooks";
 import BorrowedBooks from "../pages/BorrowedBooks";
 import PrivateRoute from "./PrivateRoute";
 import BooksAllCategory from "../pages/BooksAllCategory";
+import SingleBook from "../pages/SingleBook";
+import UpdateBook from "../pages/UpdateBook";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +50,22 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <BooksAllCategory></BooksAllCategory>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "books-details/:id",
+        element: (
+          <PrivateRoute>
+            <SingleBook></SingleBook>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "books-update/:id",
+        element: (
+          <PrivateRoute>
+            <UpdateBook></UpdateBook>
           </PrivateRoute>
         ),
       },

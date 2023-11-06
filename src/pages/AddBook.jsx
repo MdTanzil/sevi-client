@@ -47,7 +47,7 @@ const AddBook = () => {
     .then(res =>{
         if(res?.data?.insertedId){
             toast.success("Book  successfully inserted")
-            navigate('/')
+            navigate("/all-book");
         }
     })
     
@@ -95,6 +95,7 @@ const AddBook = () => {
                 placeholder="Quantity of the book"
                 className="input input-bordered focus:input-primary"
                 name="bookQuantity"
+                min={0}
                 required
               />
             </div>
@@ -120,10 +121,10 @@ const AddBook = () => {
                 <select
                   className="select select-bordered"
                   name="bookCategory"
-                  defaultValue={'none'}
+                  defaultValue={''}
                   required
                 >
-                  <option disabled value='none'  >
+                  <option disabled value={''}  >
                     Pick category
                   </option>
                   {categories?.map((d) => (
@@ -168,7 +169,7 @@ const AddBook = () => {
               className="btn bg-gray-100 border-primary border-1 hover:btn-primary"
               type="submit"
             >
-              Add Product
+              Add Book
             </button>
           </div>
         </form>
