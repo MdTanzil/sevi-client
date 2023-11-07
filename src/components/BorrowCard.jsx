@@ -42,7 +42,7 @@ const BorrowCard = ({ data, refetch }) => {
       </figure>
       <div className="">
         <h2 className="text-lg font-medium text-center mt-2 text-primary">
-          {bookName}
+          {bookName.slice(0, 25)}
         </h2>
         <p className="text-center playfair  font-medium">by {author}</p>
         <Rating

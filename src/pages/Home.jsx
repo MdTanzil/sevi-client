@@ -1,5 +1,7 @@
 import Categories from "../components/Categories";
 import Hero from "../components/Hero";
+import OurLibaries from "../components/OurLibaries";
+import OurResources from "../components/OurResources";
 
 
 
@@ -7,9 +9,11 @@ import Hero from "../components/Hero";
 const Home = () => {
     
     return (
-        <div>
+        <div className="mt-10">
             <Hero></Hero>
             <Categories></Categories>
+            <OurResources></OurResources>
+            <OurLibaries></OurLibaries>
         </div>
     );
 };

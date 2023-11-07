@@ -45,9 +45,13 @@ const AddBook = () => {
     
     axios.post('/books', book)
     .then(res =>{
+      console.log(res);
         if(res?.data?.insertedId){
             toast.success("Book  successfully inserted")
-            navigate("/all-book");
+  
+            navigate("/all-book",{ state: { addpage: true }});
+        } else{
+          console.log('error');
         }
     })
     
