@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useQuery } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
 import {  useNavigate, useParams } from "react-router-dom";
@@ -58,6 +59,18 @@ const SingleBook = () => {
     }
   };
   const handleBorrow = async () => {
+    // if borrowBook already exists
+
+    const alreadyBorrowInfo = await axios.get(`/borrows?email=${user.email}`);
+    //  console.log(alreadyBorrowInfo.data);
+    const findInfo = alreadyBorrowInfo.data.find((d) => d.bookId == _id);
+    // console.log(findInfo);
+    if (findInfo) {
+      Swal.fire("You  Already borrowed this book");
+      return;
+    }
+
+    // jodi boita  borrow kora nah thake 
     let retunDate = null;
     const { value: date } = await Swal.fire({
       title: "select return date",
@@ -72,7 +85,7 @@ const SingleBook = () => {
       retunDate = date;
     }
 
-    const brorowBook = {
+    const borrowBook = {
       name: user.displayName || "none",
       bookName: name || "",
       bookImage: imageUrl || "",
@@ -84,16 +97,16 @@ const SingleBook = () => {
       author: author || "none",
       rating: rating || 0,
     };
+
+    // logic for storing brbrrow
     if (retunDate) {
-      axios.post("/borrow", brorowBook).then((res) => {
-        console.log(res);
+      axios.post("/borrow", borrowBook).then((res) => {
+        // console.log(res);
       });
-      axios
-        .patch(`/books-quantity-decrease/${_id}`)
-        .then((res) => {
-          console.log(res);
-          refetch();
-        });
+      axios.patch(`/books-quantity-decrease/${_id}`).then((res) => {
+        // console.log(res);
+        refetch();
+      });
       // console.log(brorowBook);
     }
   };

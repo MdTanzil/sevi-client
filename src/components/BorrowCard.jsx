@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
@@ -9,11 +10,9 @@ const BorrowCard = ({ data, refetch }) => {
 
   const {
     _id,
-    name,
     bookName,
     bookImage,
     bookCategorie,
-    email,
     bookId,
     retunDate,
     borrowedDate,
@@ -31,7 +30,7 @@ const BorrowCard = ({ data, refetch }) => {
     axios
       .patch(`/books-quantity-increase/${bookId}`)
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         
       });
   };
