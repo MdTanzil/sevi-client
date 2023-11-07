@@ -11,6 +11,7 @@ import BooksAllCategory from "../pages/BooksAllCategory";
 import SingleBook from "../pages/SingleBook";
 import UpdateBook from "../pages/UpdateBook";
 import Error from "../pages/Error";
+import Reading from "../pages/Reading";
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,12 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: '/reading/:id',
+        element: <PrivateRoute>
+          <Reading></Reading>
+        </PrivateRoute>
+      }
     ],
   },
   {

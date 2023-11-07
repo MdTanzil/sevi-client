@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
-import {  useParams } from "react-router-dom";
+import {  useNavigate, useParams } from "react-router-dom";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import useAuth from "../hooks/useAuth";
@@ -13,6 +13,7 @@ const SingleBook = () => {
   const axios = useAxios();
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate()
   
   const books = async () => {
     const res = await axios.get(`/single-book/${id}`);
@@ -96,6 +97,15 @@ const SingleBook = () => {
       // console.log(brorowBook);
     }
   };
+
+  // adding read  button functionality
+
+  const handleReadButton = () => {
+    const url = `/reading/${_id}`
+    navigate(url)
+
+    //
+  }
   return (
     <div>
       <h1 className="text-4xl text-center font-bold playfair">
@@ -118,7 +128,7 @@ const SingleBook = () => {
               >
                 Borrow
               </button>
-              <button className="btn btn-sm btn-secondary text-black font-normal normal-case">
+              <button onClick={handleReadButton} className="btn btn-sm btn-secondary text-black font-normal normal-case">
                 Read
               </button>
             </div>
