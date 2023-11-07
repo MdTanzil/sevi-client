@@ -3,11 +3,13 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import useAxios from "../hooks/useAxios";
 
 const Login = () => {
-    const { signUpWithGoogle, login ,setUser} = useAuth();
+    const { signUpWithGoogle, login ,setUser } = useAuth();
     const navigate = useNavigate();
     const location = useLocation()
+    const axios = useAxios()
 
     const handleLogin = (event)=>{
         event.preventDefault();
@@ -18,7 +20,11 @@ const Login = () => {
             // Signed up
             const user = userCredential.user;
             setUser(user)
-            console.log(user);
+            axios.post('/jwt',{email : email}).then(res =>{
+              console.log('cookie set');
+            })
+
+
             toast.success(user?.email + " Log in success");
             navigate(location?.state ? location.state : "/");
             // ...
@@ -40,7 +46,11 @@ const Login = () => {
     //google login
     const googleClickHandler = () => {
       signUpWithGoogle()
-        .then(() => {
+        .then((res) => {
+          const email = { email: res.user.email }
+          axios.post("/jwt", email).then((res) => {
+            console.log("cookie set");
+          })
           toast.success("Login successful");
           navigate(location?.state ? location.state : "/");
         })
