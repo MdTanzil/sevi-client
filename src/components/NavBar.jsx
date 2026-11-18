@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
 
 const NavBar = () => {
-  const { user, logout, setUser } = useAuth();
+  const { user, logout, setUser, loading } = useAuth();
   const { canManageBooks, isAdmin } = useProfile();
   const navList = (
     <>
@@ -215,13 +215,20 @@ const NavBar = () => {
             )}
           </>
         )}
-        {!user && (
-          <Link
-            to={"/login"}
-            className="btn btn-outline btn-primary"
-          >
-            Login
-          </Link>
+        {/* While Firebase is still resolving the auth state, show a neutral
+            placeholder instead of the Login button — otherwise signed-in
+            users briefly see a Login flash on every page load. */}
+        {loading ? (
+          <div
+            className="w-10 h-10 rounded-full bg-base-300 animate-pulse"
+            aria-hidden="true"
+          />
+        ) : (
+          !user && (
+            <Link to={"/login"} className="btn btn-outline btn-primary">
+              Login
+            </Link>
+          )
         )}
       </div>
     </div>
