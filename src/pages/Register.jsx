@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth";
+import useAxios from "../hooks/useAxios";
 
 const Register = () => {
   const { register, updateUserData, signUpWithGoogle } = useAuth();
+  const axios = useAxios();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +37,10 @@ const Register = () => {
     setIsSubmitting(true);
     register(email, password)
       .then(() => {
-        // Signed up
+        // Signed up — obtain the server JWT cookie right away, like Login
+        // does, so the new user is logged in immediately instead of
+        // hitting 401s on protected pages.
+        axios.post("/jwt", { email: email }).then(() => {});
         event.target.reset();
         toast.success("Registrations Successful !");
         if (name && photo) {
@@ -61,7 +66,8 @@ const Register = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     signUpWithGoogle()
-      .then(() => {
+      .then((res) => {
+        axios.post("/jwt", { email: res.user.email }).then(() => {});
         toast.success("Login successful");
         navigate(location?.state ? location.state : "/");
       })

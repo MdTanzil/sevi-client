@@ -1,5 +1,6 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import useAxios from "../hooks/useAxios";
+import useProfile from "../hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -8,6 +9,7 @@ import BookForm from "../components/BookForm";
 const UpdateBook = () => {
   const axios = useAxios();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { canManageBooks, isLoading: profileLoading } = useProfile();
 
   const navigate = useNavigate();
 
@@ -46,6 +48,29 @@ const UpdateBook = () => {
         >
           Try again
         </button>
+      </div>
+    );
+  }
+
+  if (profileLoading) {
+    return (
+      <div className="flex justify-center my-48">
+        <span className="loading loading-bars loading-lg"></span>
+      </div>
+    );
+  }
+
+  // UI-only gating — the server enforces who can update books.
+  if (!canManageBooks) {
+    return (
+      <div className="my-48 text-center">
+        <p className="text-2xl font-bold">Librarians and admins only</p>
+        <p className="mt-2">
+          Only librarians and admins can update books in the library.
+        </p>
+        <Link to="/all-book" className="btn btn-sm btn-primary poppins mt-4">
+          Browse books
+        </Link>
       </div>
     );
   }

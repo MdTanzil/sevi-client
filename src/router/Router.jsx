@@ -12,6 +12,8 @@ import SingleBook from "../pages/SingleBook";
 import UpdateBook from "../pages/UpdateBook";
 import Error from "../pages/Error";
 import Reading from "../pages/Reading";
+import Profile from "../pages/Profile";
+import UsersAdmin from "../pages/UsersAdmin";
 
 const router = createBrowserRouter([
   {
@@ -77,6 +79,22 @@ const router = createBrowserRouter([
         element: <PrivateRoute>
           <Reading></Reading>
         </PrivateRoute>
+      },
+      {
+        path: "profile",
+        element: (
+          <PrivateRoute>
+            <Profile></Profile>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "admin/users",
+        element: (
+          <PrivateRoute>
+            <UsersAdmin></UsersAdmin>
+          </PrivateRoute>
+        ),
       }
     ],
   },

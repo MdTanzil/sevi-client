@@ -5,7 +5,10 @@ import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import SafeImage from "../components/SafeImage";
+
+const MAX_ACTIVE_BORROWS = 3;
 const SingleBook = () => {
   /**
    * TODO:  Single product detail page
@@ -29,6 +32,17 @@ const SingleBook = () => {
     queryKey: ["book"],
     queryFn: books,
   });
+
+  // The caller's active borrows — the Borrow button is disabled at the
+  // 3-book limit (the server enforces the limit too).
+  const { data: myBorrows = [] } = useQuery({
+    queryKey: ["borrowbooks"],
+    queryFn: async () => {
+      const res = await axios.get("/borrows");
+      return res.data;
+    },
+  });
+  const atBorrowLimit = myBorrows.length >= MAX_ACTIVE_BORROWS;
 
   if (isLoading) {
     return (
@@ -105,7 +119,6 @@ const SingleBook = () => {
       },
     });
     if (date) {
-      Swal.fire(`Please Return before ${date}`, "successfully borrow");
       retunDate = date;
     }
 
@@ -122,16 +135,20 @@ const SingleBook = () => {
       rating: rating || 0,
     };
 
-    // logic for storing brbrrow
+    // Only decrease the quantity after the borrow actually succeeded —
+    // a failed borrow (e.g. the 3-book limit) must not touch the stock.
     if (retunDate) {
-      axios.post("/borrow", borrowBook).then(() => {
-        // console.log(res);
-      });
-      axios.patch(`/books-quantity-decrease/${_id}`).then(() => {
-        // console.log(res);
+      try {
+        await axios.post("/borrow", borrowBook);
+        await axios.patch(`/books-quantity-decrease/${_id}`);
+        Swal.fire(`Please Return before ${retunDate}`, "successfully borrow");
         refetch();
-      });
-      // console.log(brorowBook);
+      } catch (error) {
+        toast.error(
+          error?.response?.data?.error ||
+            "Could not borrow the book. Please try again."
+        );
+      }
     }
   };
 
@@ -160,7 +177,7 @@ const SingleBook = () => {
             <div className="flex justify-around w-full">
               <button
                 onClick={handleBorrow}
-                disabled={quantity < 1}
+                disabled={quantity < 1 || atBorrowLimit}
                 className=" btn btn-sm btn-secondary text-black font-normal normal-case"
               >
                 Borrow
@@ -169,6 +186,12 @@ const SingleBook = () => {
                 Read
               </button>
             </div>
+            {atBorrowLimit && (
+              <p className="text-xs text-warning mt-1">
+                Borrow limit reached ({MAX_ACTIVE_BORROWS}/{MAX_ACTIVE_BORROWS})
+                — return a book to borrow another.
+              </p>
+            )}
           </div>
           <div className="divider lg:divider-horizontal"></div>
           <div className="grid flex-1   bg-base-100 rounded-box p-1">

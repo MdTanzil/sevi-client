@@ -23,20 +23,24 @@ const BorrowCard = ({ data, refetch }) => {
     rating,
   } = data;
 
-  const handleReturn = () => {
+  const handleReturn = async () => {
     if (isReturning) return;
     setIsReturning(true);
-    axios
-      .delete(`borrows/${_id}`)
-      .then(() => {
-        Swal.fire("Successfully return");
-        refetch();
-      })
-      .catch(() => {
-        toast.error("Could not return the book. Please try again.");
-        setIsReturning(false);
-      });
-    axios.patch(`/books-quantity-increase/${bookId}`).catch(() => {});
+    try {
+      // Return first (marks the borrow as returned, keeping the history),
+      // and only then restore the stock — a failed return must not change
+      // the quantity.
+      await axios.patch(`/borrows/${_id}/return`);
+      await axios.patch(`/books-quantity-increase/${bookId}`);
+      Swal.fire("Successfully return");
+      refetch();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not return the book. Please try again."
+      );
+      setIsReturning(false);
+    }
   };
   return (
     <div className="p-1 shadow-lg bg-base-100 m-1 rounded-lg">

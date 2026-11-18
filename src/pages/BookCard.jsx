@@ -3,9 +3,11 @@ import "@smastrom/react-rating/style.css";
 import { PropTypes } from "prop-types";
 import { Link } from "react-router-dom";
 import SafeImage from "../components/SafeImage";
+import useProfile from "../hooks/useProfile";
 
 const BookCard = ({ book }) => {
   const { _id, name, author, quantity, imageUrl, category, rating } = book;
+  const { canManageBooks } = useProfile();
   return (
     <div className="p-1 shadow-lg bg-base-100 m-1 rounded-lg">
       <figure className="flex justify-center">
@@ -44,12 +46,14 @@ const BookCard = ({ book }) => {
           >
             Details
           </Link>
-          <Link
-            to={`/books-update/${_id}`}
-            className="btn btn-sm btn-secondary text-black font-normal normal-case m-1"
-          >
-            Update
-          </Link>
+          {canManageBooks && (
+            <Link
+              to={`/books-update/${_id}`}
+              className="btn btn-sm btn-secondary text-black font-normal normal-case m-1"
+            >
+              Update
+            </Link>
+          )}
         </div>
       </div>
     </div>

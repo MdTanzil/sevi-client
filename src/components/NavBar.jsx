@@ -1,11 +1,13 @@
 import { Link, NavLink } from "react-router-dom";
 import logo from "../assets/logo.png";
 import useAuth from "../hooks/useAuth";
+import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
 
 const NavBar = () => {
   const { user, logout, setUser } = useAuth();
+  const { canManageBooks, isAdmin } = useProfile();
   const navList = (
     <>
       <li>
@@ -19,16 +21,18 @@ const NavBar = () => {
         </NavLink>
       </li>
 
-      <li>
-        <NavLink
-          to={"/add-book"}
-          className={({ isActive, isPending }) =>
-            isPending ? "pending" : isActive ? "bg-[#723182] text-white" : ""
-          }
-        >
-          Add Book
-        </NavLink>
-      </li>
+      {canManageBooks && (
+        <li>
+          <NavLink
+            to={"/add-book"}
+            className={({ isActive, isPending }) =>
+              isPending ? "pending" : isActive ? "bg-[#723182] text-white" : ""
+            }
+          >
+            Add Book
+          </NavLink>
+        </li>
+      )}
       <li>
         <NavLink
           to={"/all-book"}
@@ -49,6 +53,18 @@ const NavBar = () => {
           Borrowed Book
         </NavLink>
       </li>
+      {isAdmin && (
+        <li>
+          <NavLink
+            to={"/admin/users"}
+            className={({ isActive, isPending }) =>
+              isPending ? "pending" : isActive ? "bg-[#723182] text-white" : ""
+            }
+          >
+            Users
+          </NavLink>
+        </li>
+      )}
     </>
   );
 
@@ -130,6 +146,9 @@ const NavBar = () => {
                   className="dropdown-content z-[1] menu -left-16 shadow rounded-box "
                 >
                   <li>
+                    <Link to="/profile">My Profile</Link>
+                  </li>
+                  <li>
                     <button
                       className="btn btn-sm btn-primary"
                       onClick={handleLogOut}
@@ -154,6 +173,9 @@ const NavBar = () => {
                   className="dropdown-content z-[1] menu -left-8 shadow rounded-box "
                 >
                   <li>
+                    <Link to="/profile">My Profile</Link>
+                  </li>
+                  <li>
                     <button
                       className="btn btn-sm btn-primary"
                       onClick={handleLogOut}
@@ -177,6 +199,9 @@ const NavBar = () => {
                   tabIndex={0}
                   className="dropdown-content z-[1] menu -left-8 shadow rounded-box "
                 >
+                  <li>
+                    <Link to="/profile">My Profile</Link>
+                  </li>
                   <li>
                     <button
                       className="btn btn-sm btn-primary"
