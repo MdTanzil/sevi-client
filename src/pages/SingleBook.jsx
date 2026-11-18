@@ -60,6 +60,11 @@ const SingleBook = () => {
     category,
     rating,
     shortDescription,
+    isbn,
+    publisher,
+    publishedYear,
+    language,
+    pages,
   } = book;
   const getRating = (rating) => {
     switch (rating) {
@@ -185,6 +190,38 @@ const SingleBook = () => {
                 <span className="text-lg font-medium">Category : </span>
                 {category}
               </p>
+              {isbn && (
+                <p className="mt-2">
+                  <span className="text-lg font-medium">ISBN : </span>
+                  {isbn}
+                </p>
+              )}
+              {publisher && (
+                <p className="mt-2">
+                  <span className="text-lg font-medium">Publisher : </span>
+                  {publisher}
+                </p>
+              )}
+              {publishedYear && (
+                <p className="mt-2">
+                  <span className="text-lg font-medium">
+                    Published Year :{" "}
+                  </span>
+                  {publishedYear}
+                </p>
+              )}
+              {language && (
+                <p className="mt-2">
+                  <span className="text-lg font-medium">Language : </span>
+                  {language}
+                </p>
+              )}
+              {pages && (
+                <p className="mt-2">
+                  <span className="text-lg font-medium">Pages : </span>
+                  {pages}
+                </p>
+              )}
               <div className="my-1">
                 <Rating
                   style={{ maxWidth: 120 }}
