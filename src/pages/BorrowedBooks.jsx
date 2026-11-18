@@ -1,15 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import useAuth from "../hooks/useAuth";
 import useAxios from "../hooks/useAxios";
 import BorrowCard from "../components/BorrowCard";
 
 
 const BorrowedBooks = () => {
-  const { user } = useAuth();
   const axios = useAxios();
 
   const borrowBooks = async () => {
-    const res = await axios.get(`/borrows?email=${user.email}`);
+    const res = await axios.get("/borrows");
     return res.data;
   };
   const { data, isLoading, isError, refetch } = useQuery({

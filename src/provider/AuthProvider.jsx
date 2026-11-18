@@ -11,6 +11,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import app from "../config/firrebase.config";
+import useAxios from "../hooks/useAxios";
 
 // auth context
 export const AuthContext = createContext(null);
@@ -19,6 +20,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const auth = getAuth(app);
+  const axios = useAxios();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,7 +38,7 @@ const AuthProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   // registration  with email and password
   const register = (email, password) => {
@@ -50,10 +52,14 @@ const AuthProvider = ({ children }) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  //logout
+  //logout — clear the server JWT cookie first (best-effort, so a network
+  // failure never blocks signing out), then sign out of Firebase.
   const logout = () => {
     setLoading(false);
-    return signOut(auth);
+    return axios
+      .post("/logout")
+      .catch(() => {})
+      .then(() => signOut(auth));
   };
   // update user data
   const updateUserData = (displayName, url) => {

@@ -85,7 +85,7 @@ const SingleBook = () => {
   const handleBorrow = async () => {
     // if borrowBook already exists
 
-    const alreadyBorrowInfo = await axios.get(`/borrows?email=${user.email}`);
+    const alreadyBorrowInfo = await axios.get("/borrows");
     //  console.log(alreadyBorrowInfo.data);
     const findInfo = alreadyBorrowInfo.data.find((d) => d.bookId == _id);
     // console.log(findInfo);

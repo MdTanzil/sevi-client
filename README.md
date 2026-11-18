@@ -18,7 +18,8 @@ borrow books, and track borrowed books.
 - Borrow books with a return date, view borrowed books, and return them
 - Reading page for borrowed books
 - Authentication with Firebase (email/password and Google sign-in); library
-  pages are protected routes
+  pages are protected routes. Login obtains a JWT cookie from the API, and
+  logout clears both the Firebase session and that cookie.
 
 ## Tech stack
 
