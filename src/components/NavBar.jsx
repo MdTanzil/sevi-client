@@ -1,8 +1,8 @@
-/* eslint-disable no-unused-vars */
 import { Link, NavLink } from "react-router-dom";
 import logo from "../assets/logo.png";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import SafeImage from "./SafeImage";
 
 const NavBar = () => {
   const { user, logout, setUser } = useAuth();
@@ -59,8 +59,8 @@ const NavBar = () => {
         toast.success("Log-out successful");
         setUser(null);
       })
-      .catch((error) => {
-        toast.success("Log-out unsuccessful");
+      .catch(() => {
+        toast.error("Log-out unsuccessful");
       });
   };
   return (
@@ -115,7 +115,12 @@ const NavBar = () => {
                 <label tabIndex={0} className="">
                   <div className="avatar online placeholder ">
                     <div className="rounded-full w-10">
-                      <img className=" " src={user.photoURL} alt="img" />
+                      <SafeImage
+                        className="w-10 h-10 rounded-full object-cover"
+                        src={user.photoURL}
+                        alt={user.displayName || user.email}
+                        iconClassName="w-5 h-5 opacity-60"
+                      />
                     </div>
                   </div>
                 </label>
@@ -188,7 +193,7 @@ const NavBar = () => {
         {!user && (
           <Link
             to={"/login"}
-            className="btn bg-white border-primary border-1 hover:btn-primary"
+            className="btn btn-outline btn-primary"
           >
             Login
           </Link>

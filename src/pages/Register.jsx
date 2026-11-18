@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import toast from "react-hot-toast";
@@ -7,20 +8,16 @@ const Register = () => {
   const { register, updateUserData, signUpWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
     const form = event.target;
     const name = form.name.value || "";
     const email = form.email.value || "";
     const photo = form.photo.value || "";
     const password = form.password.value || "";
-    // const user ={
-    //     name: name,
-    //     email: email,
-    //     photo: photo,
-    //     password:password
-    // }
 
     //Password Requarment check
 
@@ -35,11 +32,10 @@ const Register = () => {
       toast.error("Password should have a special character ");
       return;
     }
+    setIsSubmitting(true);
     register(email, password)
-      .then((userCredential) => {
+      .then(() => {
         // Signed up
-        const user = userCredential.user;
-        console.log(user);
         event.target.reset();
         toast.success("Registrations Successful !");
         if (name && photo) {
@@ -55,14 +51,15 @@ const Register = () => {
       })
       .catch((error) => {
         const errorCode = error.code;
-        const errorMessage = error.message;
-        console.warn(errorMessage, errorCode);
         toast.error(errorCode);
+        setIsSubmitting(false);
         // ..
       });
   };
 
   const googleClickHangler = () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     signUpWithGoogle()
       .then(() => {
         toast.success("Login successful");
@@ -70,6 +67,7 @@ const Register = () => {
       })
       .catch((error) => {
         toast.error(error.code);
+        setIsSubmitting(false);
       });
   };
   return (
@@ -130,8 +128,19 @@ const Register = () => {
               />
             </div>
             <div className="form-control mt-6">
-              <button className="btn btn-primary" type="submit">
-                Register
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    Registering...
+                  </>
+                ) : (
+                  "Register"
+                )}
               </button>
             </div>
           </form>
@@ -145,8 +154,9 @@ const Register = () => {
           </p>
           <div className="card-body py-5">
             <button
-              className="btn hover:btn-primary"
+              className="btn btn-outline btn-primary"
               onClick={googleClickHangler}
+              disabled={isSubmitting}
             >
               Sign in with Google
               <FcGoogle></FcGoogle>

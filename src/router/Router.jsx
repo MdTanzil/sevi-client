@@ -36,7 +36,7 @@ const router = createBrowserRouter([
         path: "all-book",
         element: (
           <PrivateRoute>
-            <AllBooks></AllBooks>,
+            <AllBooks></AllBooks>
           </PrivateRoute>
         ),
       },
@@ -44,7 +44,7 @@ const router = createBrowserRouter([
         path: "borrowed-book",
         element: (
           <PrivateRoute>
-            <BorrowedBooks></BorrowedBooks>,
+            <BorrowedBooks></BorrowedBooks>
           </PrivateRoute>
         ),
       },

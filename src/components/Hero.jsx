@@ -22,6 +22,7 @@ const Hero = () => {
       <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse">
         <img
           src={hero}
+          alt="Library research illustration"
           className=" max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover "
         />
         <div>

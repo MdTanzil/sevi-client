@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useQuery } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
 import {  useNavigate, useParams } from "react-router-dom";
@@ -6,6 +5,7 @@ import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
+import SafeImage from "../components/SafeImage";
 const SingleBook = () => {
   /**
    * TODO:  Single product detail page
@@ -23,6 +23,7 @@ const SingleBook = () => {
   const {
     data: book,
     isLoading,
+    isError,
     refetch,
   } = useQuery({
     queryKey: ["book"],
@@ -30,7 +31,25 @@ const SingleBook = () => {
   });
 
   if (isLoading) {
-    return <span className="loading loading-bars loading-lg"></span>;
+    return (
+      <div className="flex justify-center my-48">
+        <span className="loading loading-bars loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (isError || !book) {
+    return (
+      <div className="my-48 text-center">
+        <p className="text-2xl font-bold">Could not load this book</p>
+        <button
+          className="btn btn-sm btn-primary poppins mt-4"
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
   }
   const {
     _id,
@@ -100,10 +119,10 @@ const SingleBook = () => {
 
     // logic for storing brbrrow
     if (retunDate) {
-      axios.post("/borrow", borrowBook).then((res) => {
+      axios.post("/borrow", borrowBook).then(() => {
         // console.log(res);
       });
-      axios.patch(`/books-quantity-decrease/${_id}`).then((res) => {
+      axios.patch(`/books-quantity-decrease/${_id}`).then(() => {
         // console.log(res);
         refetch();
       });
@@ -127,10 +146,10 @@ const SingleBook = () => {
       <div className="mt-5">
         <div className="flex flex-col w-full lg:flex-row items-center">
           <div className="grid  card  rounded-box place-items-center">
-            <img
+            <SafeImage
               src={imageUrl}
               className="rounded-lg h-[350px] w-[230px] object-cover"
-              alt=""
+              alt={name}
             />
             <p> {category}</p>
             <div className="flex justify-around w-full">
@@ -169,7 +188,7 @@ const SingleBook = () => {
               <div className="my-1">
                 <Rating
                   style={{ maxWidth: 120 }}
-                  value={rating / 2}
+                  value={(rating || 0) / 2}
                   readOnly
                   className="ml-0 lg:ml-2"
                 />

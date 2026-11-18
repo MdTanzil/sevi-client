@@ -13,13 +13,33 @@ const Reading = () => {
       const {
         data: book,
         isLoading,
+        isError,
+        refetch,
       } = useQuery({
         queryKey: ["book"],
         queryFn: books,
       });
 
       if (isLoading) {
-        return <span className="loading loading-bars loading-lg"></span>;
+        return (
+          <div className="flex justify-center my-48">
+            <span className="loading loading-bars loading-lg"></span>
+          </div>
+        );
+      }
+
+      if (isError || !book) {
+        return (
+          <div className="my-48 text-center">
+            <p className="text-2xl font-bold">Could not load this book</p>
+            <button
+              className="btn btn-sm btn-primary poppins mt-4"
+              onClick={() => refetch()}
+            >
+              Try again
+            </button>
+          </div>
+        );
       }
       const {
        

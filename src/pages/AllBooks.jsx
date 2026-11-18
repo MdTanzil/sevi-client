@@ -13,7 +13,7 @@ const AllBooks = () => {
     const res = await axios.get(`/books`);
     return res.data;
   };
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["allBooks"],
     queryFn: getAllBooks,
   });
@@ -31,7 +31,25 @@ const AllBooks = () => {
 
   // loging data
   if (isLoading) {
-    return <span className="loading loading-bars loading-lg"></span>;
+    return (
+      <div className="flex justify-center my-48">
+        <span className="loading loading-bars loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="my-48 text-center">
+        <p className="text-2xl font-bold">Could not load the books</p>
+        <button
+          className="btn btn-sm btn-primary poppins mt-4"
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
   }
 
   // if  all page routes cll form add page . then refetch
@@ -89,7 +107,7 @@ const AllBooks = () => {
         </p>
       )}
       {data.length <= 0 && (
-        <div className="h-3.5 my-48 te text-center text-bold text-2xl">
+        <div className="my-48 text-center text-2xl font-bold">
           Do not have any Books{" "}
         </div>
       )}

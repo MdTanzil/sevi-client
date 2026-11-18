@@ -12,7 +12,7 @@ const OurResources = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 mt-5 ">
           <div className="card bg-base-100 ">
             <figure className="px-10 pt-10">
-              <img src={researchers} alt="Shoes" className="rounded-xl" />
+              <img src={researchers} alt="Researchers" className="rounded-xl" />
             </figure>
             <div className="card-body items-center text-center">
               <h2 className="text-lg font-semibold">Researchers</h2>
@@ -24,7 +24,7 @@ const OurResources = () => {
           </div>
           <div className="card bg-base-100 ">
             <figure className="px-10 pt-10">
-              <img src={librarian} alt="Shoes" className="rounded-xl" />
+              <img src={librarian} alt="Librarian" className="rounded-xl" />
             </figure>
             <div className="card-body items-center text-center">
               <h2 className="text-lg font-semibold">Librarian</h2>
@@ -36,7 +36,7 @@ const OurResources = () => {
           </div>
           <div className="card bg-base-100 ">
             <figure className="px-10 pt-10">
-              <img src={societies} alt="Shoes" className="rounded-xl" />
+              <img src={societies} alt="Societies" className="rounded-xl" />
             </figure>
             <div className="card-body items-center text-center">
               <h2 className="text-lg font-semibold">Societies</h2>
@@ -48,7 +48,7 @@ const OurResources = () => {
           </div>
           <div className="card bg-base-100 ">
             <figure className="px-10 pt-10">
-              <img src={authors} alt="Shoes" className="rounded-xl" />
+              <img src={authors} alt="Authors" className="rounded-xl" />
             </figure>
             <div className="card-body items-center text-center">
               <h2 className="text-lg font-semibold">Authors!</h2>

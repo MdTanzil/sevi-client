@@ -12,12 +12,30 @@ const BorrowedBooks = () => {
     const res = await axios.get(`/borrows?email=${user.email}`);
     return res.data;
   };
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["borrowbooks"],
     queryFn: borrowBooks,
   });
   if (isLoading) {
-    return <span className="loading loading-bars loading-lg"></span>;
+    return (
+      <div className="flex justify-center my-48">
+        <span className="loading loading-bars loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="my-48 text-center">
+        <p className="text-2xl font-bold">Could not load your borrowed books</p>
+        <button
+          className="btn btn-sm btn-primary poppins mt-4"
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -27,7 +45,7 @@ const BorrowedBooks = () => {
         <span className="text-secondary">Borrowed</span> Books
       </h1>
       {data.length <= 0 && (
-        <div className="h-3.5 my-48 te text-center text-bold text-2xl">
+        <div className="my-48 text-center text-2xl font-bold">
           Do not have any Books{" "}
         </div>
       )}

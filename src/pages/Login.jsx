@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import useAuth from "../hooks/useAuth";
@@ -10,19 +10,20 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation()
     const axios = useAxios()
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLogin = (event)=>{
         event.preventDefault();
+        if (isSubmitting) return;
         const email = event.target.email.value || ''
         const password = event.target.password.value ||''
+        setIsSubmitting(true);
         login(email, password)
           .then((userCredential) => {
             // Signed up
             const user = userCredential.user;
             setUser(user)
-            axios.post('/jwt',{email : email}).then(res =>{
-              console.log('cookie set');
-            })
+            axios.post('/jwt',{email : email}).then(() => {})
 
 
             toast.success(user?.email + " Log in success");
@@ -31,8 +32,8 @@ const Login = () => {
           })
           .catch((error) => {
             const errorCode = error.code;
-            const errorMessage = error.message;
             toast.error(errorCode);
+            setIsSubmitting(false);
             // ..
           });
 
@@ -45,17 +46,18 @@ const Login = () => {
 
     //google login
     const googleClickHandler = () => {
+      if (isSubmitting) return;
+      setIsSubmitting(true);
       signUpWithGoogle()
         .then((res) => {
           const email = { email: res.user.email }
-          axios.post("/jwt", email).then((res) => {
-            console.log("cookie set");
-          })
+          axios.post("/jwt", email).then(() => {})
           toast.success("Login successful");
           navigate(location?.state ? location.state : "/");
         })
         .catch((error) => {
           toast.error(error.code);
+          setIsSubmitting(false);
         });
     };
     return (
@@ -97,8 +99,19 @@ const Login = () => {
                 </label>
               </div>
               <div className="form-control mt-6">
-                <button className="btn btn-primary" type="submit">
-                  Login
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      Logging in...
+                    </>
+                  ) : (
+                    "Login"
+                  )}
                 </button>
               </div>
             </form>
@@ -112,8 +125,9 @@ const Login = () => {
             </p>
             <div className="card-body">
               <button
-                className="btn hover:btn-primary"
+                className="btn btn-outline btn-primary"
                 onClick={googleClickHandler}
+                disabled={isSubmitting}
               >
                 Sign in with Google
                 <FcGoogle></FcGoogle>

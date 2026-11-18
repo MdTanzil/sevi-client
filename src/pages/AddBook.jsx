@@ -1,23 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const AddBook = () => {
-  const [categories, setCategories] = useState([]);
-  const axios = useAxios()
-  const navigate = useNavigate()
+  const axios = useAxios();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    axios.get("/categories").then((response) => {
-      setCategories(response.data);
-    });
-  }, []);
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await axios.get("/categories");
+      return response.data;
+    },
+  });
 
   const handleAddBook = (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
-    // get data from form 
+    // get data from form
     const name = e.target.bookName.value || "";
     const author = e.target.authorName.value || "";
 
@@ -26,9 +30,6 @@ const AddBook = () => {
     const imageUrl = e.target.bookImageUrl.value || "";
 
     const category = e.target.bookCategory.value || "";
-    if(category=='none'){
-        return toast.error('Please select a category')
-    }
 
     const rating = e.target.bookRating.value || "";
     const shortDescription = e.target.bookShortDescription.value || "";
@@ -42,19 +43,24 @@ const AddBook = () => {
       rating,
       shortDescription,
     };
-    
-    axios.post('/books', book)
-    .then(res =>{
-      console.log(res);
-        if(res?.data?.insertedId){
-            toast.success("Book  successfully inserted")
-  
-            navigate("/all-book",{ state: { addpage: true }});
-        } else{
-          console.log('error');
+
+    setIsSubmitting(true);
+    axios
+      .post("/books", book)
+      .then((res) => {
+        if (res?.data?.insertedId) {
+          toast.success("Book successfully inserted");
+
+          navigate("/all-book", { state: { addpage: true } });
+        } else {
+          toast.error("Could not add the book. Please try again.");
+          setIsSubmitting(false);
         }
-    })
-    
+      })
+      .catch(() => {
+        toast.error("Could not add the book. Please try again.");
+        setIsSubmitting(false);
+      });
   };
   return (
     <div className="mt-5">
@@ -123,12 +129,12 @@ const AddBook = () => {
               </label>
               <div className="input-group">
                 <select
-                  className="select select-bordered"
+                  className="select select-bordered w-full"
                   name="bookCategory"
-                  defaultValue={''}
+                  defaultValue={""}
                   required
                 >
-                  <option disabled value={''}  >
+                  <option disabled value={""}>
                     Pick category
                   </option>
                   {categories?.map((d) => (
@@ -149,7 +155,7 @@ const AddBook = () => {
                 min={0}
                 max={10}
                 placeholder="Book Rating"
-                className="input input-bordered w-50 focus:input-primary"
+                className="input input-bordered focus:input-primary"
                 required
               />
             </div>
@@ -170,10 +176,18 @@ const AddBook = () => {
           </div>
           <div className="form-control mt-6 w-1/2 mx-auto">
             <button
-              className="btn bg-gray-100 border-primary border-1 hover:btn-primary"
+              className="btn btn-outline btn-primary"
               type="submit"
+              disabled={isSubmitting}
             >
-              Add Book
+              {isSubmitting ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Adding...
+                </>
+              ) : (
+                "Add Book"
+              )}
             </button>
           </div>
         </form>

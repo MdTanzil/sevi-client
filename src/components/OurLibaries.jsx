@@ -8,9 +8,10 @@ const OurLibaries = () => {
           <div className="hero-content flex-col lg:flex-row">
             <img
               src={libraries}
-              className="max-w-sm lg:max-w-xl rounded-lg shadow-lg flex-1 object-cover"
+              alt="Sevi libraries"
+              className="w-full max-w-sm lg:max-w-xl rounded-lg shadow-lg flex-1 object-cover"
             />
-            <div className="flax-1">
+            <div className="flex-1">
               <h1 className="text-4xl font-bold playfair mt-5">
                 <span className="text-secondary">Our </span> libraries
               </h1>
