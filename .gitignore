@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .firebase
 
+# Environment variables (local only; .env.example is committed as a template)
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
