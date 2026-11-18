@@ -1,7 +1,22 @@
 /* eslint-disable react/no-unescaped-entities */
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import hero from "../assets/hero.png";
 
 const Hero = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const query = searchTerm.trim();
+    if (query) {
+      navigate(`/all-book?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate("/all-book");
+    }
+  };
+
   return (
     <div className="hero min-h-screen  ">
       <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse">
@@ -16,13 +31,18 @@ const Hero = () => {
           <p className="py-6">
             Accelerating research discovery to shape a better future
           </p>
-          <div className="flex justify-center  items-center">
+          <form
+            onSubmit={handleSearch}
+            className="flex justify-center  items-center"
+          >
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search books, articles, keywords "
               className="input input-bordered w-2/3 lg:w-4/5 input-primary placeholder:text-primary"
             />
-            <button className="btn btn-square text-primary ml-1">
+            <button type="submit" className="btn btn-square text-primary ml-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -38,7 +58,7 @@ const Hero = () => {
                 />
               </svg>
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
