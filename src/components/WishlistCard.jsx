@@ -3,6 +3,15 @@ import { PropTypes } from "prop-types";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import { Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Typography,
+} from "@mui/material";
 import useAxios from "../hooks/useAxios";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
@@ -31,56 +40,77 @@ const WishlistCard = ({ entry, refetch }) => {
   };
 
   return (
-    <div className="p-1 shadow-lg hover:shadow-xl transition-shadow bg-base-100 m-1 rounded-xl border-2 border-transparent">
-      <figure className="flex justify-center relative">
+    <Card
+      sx={{
+        p: 0.5,
+        m: 0.5,
+        border: 2,
+        borderColor: "transparent",
+        boxShadow: 3,
+        "&:hover": { boxShadow: 6 },
+      }}
+    >
+      <Box sx={{ display: "flex", justifyContent: "center", position: "relative" }}>
         <SafeImage
           src={imageUrl}
           alt={name}
           className="h-56 w-full object-cover rounded-t-lg"
         />
-        <span
-          className={`badge absolute top-3 right-3 shadow ${
-            outOfStock ? "badge-error text-white" : "badge-success"
-          }`}
-        >
-          {outOfStock ? "Out of stock" : `${quantity} left`}
-        </span>
-      </figure>
-      <div className="px-2 pb-2">
-        <h2
-          className="text-lg font-medium text-center mt-2 text-primary truncate"
+        <Chip
+          label={outOfStock ? "Out of stock" : `${quantity} left`}
+          color={outOfStock ? "error" : "success"}
+          size="small"
+          sx={{ position: "absolute", top: 12, right: 12, boxShadow: 1 }}
+        />
+      </Box>
+      <CardContent sx={{ px: 1, pb: 1 }}>
+        <Typography
+          variant="h6"
+          component="h2"
+          align="center"
+          noWrap
           title={name}
+          sx={{ color: "primary.main", mt: 1, fontWeight: 500 }}
         >
           {name}
-        </h2>
-        <p className="text-center playfair font-medium">by {author}</p>
+        </Typography>
+        <Typography align="center" className="playfair" fontWeight={500}>
+          by {author}
+        </Typography>
         <Rating
           style={{ maxWidth: 120 }}
           value={(rating || 0) / 2}
           readOnly
           className="mx-auto"
         />
-        <p className="text-center font-medium ">
+        <Typography align="center" fontWeight={500}>
           <span className=""> Categories : {category}</span>{" "}
-        </p>
+        </Typography>
+      </CardContent>
 
-        <div className="flex justify-center gap-2 ">
-          <Link
-            to={`/books-details/${_id}`}
-            className="btn btn-sm btn-secondary text-black font-normal normal-case m-1"
-          >
-            View Details
-          </Link>
-          <button
-            className="btn btn-sm btn-outline btn-error font-normal normal-case m-1"
-            onClick={handleRemove}
-            disabled={isRemoving}
-          >
-            {isRemoving ? "Removing..." : "Remove"}
-          </button>
-        </div>
-      </div>
-    </div>
+      <CardActions sx={{ justifyContent: "center" }}>
+        <Button
+          component={Link}
+          to={`/books-details/${_id}`}
+          variant="contained"
+          color="secondary"
+          size="small"
+          sx={{ color: "black", textTransform: "none", m: 0.5 }}
+        >
+          View Details
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          sx={{ textTransform: "none", m: 0.5 }}
+          onClick={handleRemove}
+          disabled={isRemoving}
+        >
+          {isRemoving ? "Removing..." : "Remove"}
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 

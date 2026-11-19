@@ -1,4 +1,10 @@
 import { PropTypes } from "prop-types";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CircularProgress from "@mui/material/CircularProgress";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 const currentYear = new Date().getFullYear();
 
@@ -60,143 +66,140 @@ const BookForm = ({
   };
 
   return (
-    <div className="card bg-base-100 shadow-xl rounded-box max-w-4xl mx-auto">
-      <form className="card-body gap-6 p-4 sm:p-8" onSubmit={handleSubmit}>
+    <Card sx={{ maxWidth: "56rem", mx: "auto", borderRadius: 4 }} elevation={6}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          p: { xs: 2, sm: 4 },
+        }}
+      >
         <section>
-          <h3 className="text-lg font-semibold playfair border-b border-base-300 pb-2 mb-4">
+          <Typography
+            component="h3"
+            className="playfair"
+            sx={{
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              borderBottom: 1,
+              borderColor: "divider",
+              pb: 1,
+              mb: 2,
+            }}
+          >
             Basic Information
-          </h3>
+          </Typography>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Book Name</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Book Name"
-                defaultValue={initialBook.name || ""}
-                className="input input-bordered focus:input-primary"
-                name="bookName"
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Author Name</span>
-              </label>
-              <input
-                type="text"
-                name="authorName"
-                placeholder="Author Name"
-                defaultValue={initialBook.author || ""}
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Select Book Category</span>
-              </label>
-              <select
-                className="select select-bordered w-full"
-                name="bookCategory"
-                defaultValue={initialBook.category || ""}
-                required
-              >
-                <option disabled value="">
-                  Pick category
+            <TextField
+              type="text"
+              label="Book Name"
+              placeholder="Book Name"
+              defaultValue={initialBook.name || ""}
+              name="bookName"
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              type="text"
+              label="Author Name"
+              name="authorName"
+              placeholder="Author Name"
+              defaultValue={initialBook.author || ""}
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              select
+              SelectProps={{ native: true }}
+              label="Select Book Category"
+              name="bookCategory"
+              defaultValue={initialBook.category || ""}
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            >
+              <option disabled value="">
+                Pick category
+              </option>
+              {categories?.map((d) => (
+                <option value={d.name} key={d._id}>
+                  {d.name}
                 </option>
-                {categories?.map((d) => (
-                  <option value={d.name} key={d._id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Book Rating (0 - 10)</span>
-              </label>
-              <input
-                type="number"
-                name="bookRating"
-                min={0}
-                max={10}
-                defaultValue={initialBook.rating ?? ""}
-                placeholder="Book Rating"
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
+              ))}
+            </TextField>
+            <TextField
+              type="number"
+              label="Book Rating (0 - 10)"
+              name="bookRating"
+              inputProps={{ min: 0, max: 10 }}
+              defaultValue={initialBook.rating ?? ""}
+              placeholder="Book Rating"
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
           </div>
         </section>
 
         <section>
-          <h3 className="text-lg font-semibold playfair border-b border-base-300 pb-2 mb-4">
+          <Typography
+            component="h3"
+            className="playfair"
+            sx={{
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              borderBottom: 1,
+              borderColor: "divider",
+              pb: 1,
+              mb: 2,
+            }}
+          >
             Publication Details
-          </h3>
+          </Typography>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  ISBN{" "}
-                  <span className="text-xs opacity-60">(optional)</span>
-                </span>
-              </label>
-              <input
+            <TextField
+              type="text"
+              label="ISBN (optional)"
+              name="bookIsbn"
+              placeholder="e.g. 9780547928227"
+              defaultValue={initialBook.isbn || ""}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              type="text"
+              label="Publisher (optional)"
+              name="bookPublisher"
+              placeholder="e.g. Penguin Books"
+              defaultValue={initialBook.publisher || ""}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              type="number"
+              label="Published Year (optional)"
+              name="bookPublishedYear"
+              inputProps={{ min: 1000, max: currentYear }}
+              placeholder={`e.g. ${currentYear}`}
+              defaultValue={initialBook.publishedYear ?? ""}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <div>
+              <TextField
                 type="text"
-                name="bookIsbn"
-                placeholder="e.g. 9780547928227"
-                defaultValue={initialBook.isbn || ""}
-                className="input input-bordered focus:input-primary"
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  Publisher{" "}
-                  <span className="text-xs opacity-60">(optional)</span>
-                </span>
-              </label>
-              <input
-                type="text"
-                name="bookPublisher"
-                placeholder="e.g. Penguin Books"
-                defaultValue={initialBook.publisher || ""}
-                className="input input-bordered focus:input-primary"
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  Published Year{" "}
-                  <span className="text-xs opacity-60">(optional)</span>
-                </span>
-              </label>
-              <input
-                type="number"
-                name="bookPublishedYear"
-                min={1000}
-                max={currentYear}
-                placeholder={`e.g. ${currentYear}`}
-                defaultValue={initialBook.publishedYear ?? ""}
-                className="input input-bordered focus:input-primary"
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  Language{" "}
-                  <span className="text-xs opacity-60">(optional)</span>
-                </span>
-              </label>
-              <input
-                type="text"
+                label="Language (optional)"
                 name="bookLanguage"
-                list="book-languages"
+                inputProps={{ list: "book-languages" }}
                 placeholder="e.g. English"
                 defaultValue={initialBook.language || ""}
-                className="input input-bordered focus:input-primary"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
               />
               <datalist id="book-languages">
                 {commonLanguages.map((lang) => (
@@ -204,93 +207,101 @@ const BookForm = ({
                 ))}
               </datalist>
             </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  Pages{" "}
-                  <span className="text-xs opacity-60">(optional)</span>
-                </span>
-              </label>
-              <input
-                type="number"
-                name="bookPages"
-                min={1}
-                placeholder="e.g. 366"
-                defaultValue={initialBook.pages ?? ""}
-                className="input input-bordered focus:input-primary"
-              />
-            </div>
+            <TextField
+              type="number"
+              label="Pages (optional)"
+              name="bookPages"
+              inputProps={{ min: 1 }}
+              placeholder="e.g. 366"
+              defaultValue={initialBook.pages ?? ""}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
           </div>
         </section>
 
         <section>
-          <h3 className="text-lg font-semibold playfair border-b border-base-300 pb-2 mb-4">
+          <Typography
+            component="h3"
+            className="playfair"
+            sx={{
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              borderBottom: 1,
+              borderColor: "divider",
+              pb: 1,
+              mb: 2,
+            }}
+          >
             Cover &amp; Stock
-          </h3>
+          </Typography>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Book Image Url</span>
-              </label>
-              <input
-                type="text"
-                name="bookImageUrl"
-                placeholder="Book Image Url"
-                defaultValue={initialBook.imageUrl || ""}
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Quantity of the book</span>
-              </label>
-              <input
-                type="number"
-                placeholder="Quantity of the book"
-                defaultValue={initialBook.quantity ?? ""}
-                min={0}
-                className="input input-bordered focus:input-primary"
-                name="bookQuantity"
-                required
-              />
-            </div>
+            <TextField
+              type="text"
+              label="Book Image Url"
+              name="bookImageUrl"
+              placeholder="Book Image Url"
+              defaultValue={initialBook.imageUrl || ""}
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              type="number"
+              label="Quantity of the book"
+              placeholder="Quantity of the book"
+              defaultValue={initialBook.quantity ?? ""}
+              inputProps={{ min: 0 }}
+              name="bookQuantity"
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
           </div>
         </section>
 
         <section>
-          <h3 className="text-lg font-semibold playfair border-b border-base-300 pb-2 mb-4">
+          <Typography
+            component="h3"
+            className="playfair"
+            sx={{
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              borderBottom: 1,
+              borderColor: "divider",
+              pb: 1,
+              mb: 2,
+            }}
+          >
             Description
-          </h3>
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text">Book Short Description</span>
-            </label>
-            <textarea
-              className="textarea textarea-bordered focus:textarea-primary w-full h-32"
-              placeholder="Book Short Description"
-              name="bookShortDescription"
-              defaultValue={initialBook.shortDescription || ""}
-            ></textarea>
-          </div>
+          </Typography>
+          <TextField
+            label="Book Short Description"
+            placeholder="Book Short Description"
+            name="bookShortDescription"
+            defaultValue={initialBook.shortDescription || ""}
+            multiline
+            rows={4}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+          />
         </section>
 
-        <button
-          className="btn btn-primary w-full"
+        <Button
           type="submit"
+          variant="contained"
+          fullWidth
           disabled={isSubmitting}
+          startIcon={
+            isSubmitting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : undefined
+          }
         >
-          {isSubmitting ? (
-            <>
-              <span className="loading loading-spinner loading-sm"></span>
-              {submittingLabel}
-            </>
-          ) : (
-            submitLabel
-          )}
-        </button>
-      </form>
-    </div>
+          {isSubmitting ? submittingLabel : submitLabel}
+        </Button>
+      </Box>
+    </Card>
   );
 };
 

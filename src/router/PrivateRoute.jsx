@@ -1,4 +1,6 @@
 import { PropTypes } from "prop-types";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 import useAuth from "../hooks/useAuth";
 import { Navigate, useLocation } from "react-router-dom";
 
@@ -9,7 +11,11 @@ const PrivateRoute = ({ children }) => {
     return children;
   }
   if (loading) {
-     return <span className="loading loading-bars loading-lg"></span>
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", my: 12 }}>
+        <CircularProgress size={56} />
+      </Box>
+    );
   }
   return (
     <div>

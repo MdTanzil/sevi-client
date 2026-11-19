@@ -1,4 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 
 const FAQS = [
   {
@@ -55,35 +63,54 @@ const FAQS = [
 
 const Faq = () => {
   return (
-    <div className="mt-5 max-w-3xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Frequently Asked</span> Questions
-      </h1>
-      <p className="text-center mt-4 opacity-80">
+    <Container maxWidth="md" sx={{ mt: 5 }}>
+      <Typography
+        variant="h3"
+        component="h1"
+        align="center"
+        fontWeight="bold"
+        className="playfair"
+        sx={{ fontSize: { xs: "1.875rem", sm: "2.25rem" } }}
+      >
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Frequently Asked
+        </Box>{" "}
+        Questions
+      </Typography>
+      <Typography
+        variant="body1"
+        align="center"
+        color="text.secondary"
+        sx={{ mt: 2 }}
+      >
         Everything about borrowing, returning, and your membership. Still
         stuck?{" "}
-        <Link to="/contact" className="link link-primary">
+        <Link component={RouterLink} to="/contact" underline="hover">
           Contact us
         </Link>
         .
-      </p>
-      <div className="mt-8 mb-6 space-y-3">
+      </Typography>
+      <Box sx={{ mt: 4, mb: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
         {FAQS.map((faq) => (
-          <div
-            key={faq.question}
-            className="collapse collapse-arrow bg-base-100 shadow-xl"
-          >
-            <input type="checkbox" />
-            <div className="collapse-title text-base sm:text-lg font-medium">
-              {faq.question}
-            </div>
-            <div className="collapse-content">
-              <p>{faq.answer}</p>
-            </div>
-          </div>
+          <Accordion key={faq.question} elevation={4}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography
+                variant="subtitle1"
+                fontWeight={500}
+                sx={{ fontSize: { xs: "1rem", sm: "1.125rem" } }}
+              >
+                {faq.question}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary">
+                {faq.answer}
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Container>
   );
 };
 

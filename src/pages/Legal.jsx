@@ -1,5 +1,11 @@
 import { PropTypes } from "prop-types";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
 
 // Short, plain-language legal pages for this small library app. Each
 // route (/terms, /privacy, /cookies) shows one section, with links to
@@ -82,27 +88,42 @@ const SECTIONS = {
 const Legal = ({ section = "terms" }) => {
   const current = SECTIONS[section] || SECTIONS.terms;
   return (
-    <div className="mt-5 max-w-3xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Sevi</span> {current.title}
-      </h1>
-      <div className="flex flex-wrap justify-center gap-2 mt-6">
+    <Container maxWidth="md" sx={{ mt: 5 }}>
+      <Typography
+        variant="h3"
+        component="h1"
+        align="center"
+        fontWeight="bold"
+        className="playfair"
+        sx={{ fontSize: { xs: "1.875rem", sm: "2.25rem" } }}
+      >
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Sevi
+        </Box>{" "}
+        {current.title}
+      </Typography>
+      <Box
+        sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1, mt: 3 }}
+      >
         {Object.entries(SECTIONS).map(([key, value]) => (
-          <Link
+          <Button
             key={key}
+            component={RouterLink}
             to={`/${key === "terms" ? "terms" : key}`}
-            className={`btn btn-sm ${
-              key === section ? "btn-primary" : "btn-outline btn-primary"
-            }`}
+            size="small"
+            variant={key === section ? "contained" : "outlined"}
+            color="primary"
           >
             {value.title}
-          </Link>
+          </Button>
         ))}
-      </div>
-      <div className="card bg-base-100 shadow-xl mt-6 mb-6">
-        <div className="card-body p-4 sm:p-8 space-y-4">{current.body}</div>
-      </div>
-    </div>
+      </Box>
+      <Card elevation={4} sx={{ mt: 3, mb: 3 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+          <Box className="space-y-4">{current.body}</Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 

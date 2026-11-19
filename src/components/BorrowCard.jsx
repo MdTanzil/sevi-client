@@ -2,6 +2,15 @@ import { useState } from "react";
 import { PropTypes } from "prop-types";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Typography,
+} from "@mui/material";
 import useAxios from "../hooks/useAxios";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
@@ -48,68 +57,89 @@ const BorrowCard = ({ data, refetch }) => {
     }
   };
   return (
-    <div
-      className={`p-1 shadow-lg hover:shadow-xl transition-shadow bg-base-100 m-1 rounded-xl border-2 ${
-        dueStatus === "overdue"
-          ? "border-error"
-          : dueStatus === "due-soon"
-          ? "border-warning"
-          : "border-transparent"
-      }`}
+    <Card
+      sx={{
+        p: 0.5,
+        m: 0.5,
+        border: 2,
+        borderColor:
+          dueStatus === "overdue"
+            ? "error.main"
+            : dueStatus === "due-soon"
+            ? "warning.main"
+            : "transparent",
+        boxShadow: 3,
+        "&:hover": { boxShadow: 6 },
+      }}
     >
-      <figure className="flex justify-center relative">
+      <Box sx={{ display: "flex", justifyContent: "center", position: "relative" }}>
         <SafeImage
           src={bookImage}
           alt={bookName}
           className="h-56 w-full object-cover rounded-t-lg"
         />
         {dueStatus === "overdue" && (
-          <span className="badge badge-error text-white absolute top-3 right-3 shadow">
-            Overdue
-          </span>
+          <Chip
+            label="Overdue"
+            color="error"
+            size="small"
+            sx={{ position: "absolute", top: 12, right: 12, boxShadow: 1 }}
+          />
         )}
         {dueStatus === "due-soon" && (
-          <span className="badge badge-warning absolute top-3 right-3 shadow">
-            Due soon
-          </span>
+          <Chip
+            label="Due soon"
+            color="warning"
+            size="small"
+            sx={{ position: "absolute", top: 12, right: 12, boxShadow: 1 }}
+          />
         )}
-      </figure>
-      <div className="px-2 pb-2">
-        <h2
-          className="text-lg font-medium text-center mt-2 text-primary truncate"
+      </Box>
+      <CardContent sx={{ px: 1, pb: 1 }}>
+        <Typography
+          variant="h6"
+          component="h2"
+          align="center"
+          noWrap
           title={bookName}
+          sx={{ color: "primary.main", mt: 1, fontWeight: 500 }}
         >
           {bookName}
-        </h2>
-        <p className="text-center playfair font-medium">by {author}</p>
+        </Typography>
+        <Typography align="center" className="playfair" fontWeight={500}>
+          by {author}
+        </Typography>
         <Rating
           style={{ maxWidth: 120 }}
           value={(rating || 0) / 2}
           readOnly
           className="mx-auto"
         />
-        <p className="text-center font-medium ">
+        <Typography align="center" fontWeight={500}>
           <span className=""> Categories : {bookCategorie}</span>{" "}
-        </p>
+        </Typography>
 
-        <p className="text-center font-medium ">
+        <Typography align="center" fontWeight={500}>
           <span className=""> Borrow Date : {borrowedDate}</span>{" "}
-        </p>
-        <p className="text-center font-medium ">
+        </Typography>
+        <Typography align="center" fontWeight={500}>
           <span className=""> Return Date : {retunDate}</span>{" "}
-        </p>
+        </Typography>
+      </CardContent>
 
-        <div className="flex justify-center gap-2 ">
-          <button
-            className="btn btn-sm btn-secondary text-black font-normal normal-case m-1"
-            onClick={handleReturn}
-            disabled={isReturning}
-          >
-            {isReturning ? "Returning..." : "Return"}
-          </button>
-        </div>
-      </div>
-    </div>
+      <CardActions sx={{ justifyContent: "center" }}>
+        <Button
+          variant="contained"
+          color="secondary"
+          size="small"
+          sx={{ color: "black", textTransform: "none", m: 0.5 }}
+          onClick={handleReturn}
+          disabled={isReturning}
+        >
+          {isReturning ? "Returning..." : "Return"}
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 

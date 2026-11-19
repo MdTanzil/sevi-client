@@ -1,6 +1,11 @@
 /* eslint-disable react/no-unescaped-entities */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import SearchIcon from "@mui/icons-material/Search";
 import hero from "../assets/hero.png";
 
 const Hero = () => {
@@ -18,52 +23,73 @@ const Hero = () => {
   };
 
   return (
-    <div className="hero min-h-[85vh] lg:min-h-screen grid-cols-1">
-      <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse px-4 max-w-full">
+    <Box
+      sx={{
+        display: "grid",
+        // Single column capped at the container width — the equivalent of
+        // Tailwind's grid-cols-1 (minmax(0,1fr)). Without it the hero can
+        // overflow horizontally on small screens.
+        gridTemplateColumns: "minmax(0, 1fr)",
+        minHeight: { xs: "85vh", lg: "100vh" },
+        placeItems: "center",
+      }}
+    >
+      <Box className="flex flex-col gap-0 lg:gap-10 lg:flex-row-reverse px-4 max-w-full">
         <img
           src={hero}
           alt="Library research illustration"
           className="w-full max-w-[260px] sm:max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover"
         />
-        <div className="text-center lg:text-left min-w-0 w-full max-w-full">
-          <h1 className="text-2xl sm:text-5xl font-bold playfair leading-tight [overflow-wrap:anywhere]">
+        <Box className="text-center lg:text-left min-w-0 w-full max-w-full">
+          <Typography
+            component="h1"
+            variant="h1"
+            className="playfair"
+            sx={{
+              fontSize: { xs: "1.5rem", sm: "3rem" },
+              fontWeight: 700,
+              lineHeight: 1.25,
+              overflowWrap: "anywhere",
+            }}
+          >
             Today's research, <br className="hidden sm:block" /> tomorrow's
             innovation
-          </h1>
-          <p className="py-4 sm:py-6">
+          </Typography>
+          <Typography sx={{ py: { xs: 2, sm: 3 } }}>
             Accelerating research discovery to shape a better future
-          </p>
-          <form
+          </Typography>
+          <Box
+            component="form"
             onSubmit={handleSearch}
             className="flex items-center gap-2 w-full max-w-lg mx-auto lg:mx-0"
           >
-            <input
+            <TextField
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search books, articles, keywords "
-              className="input input-bordered flex-1 min-w-0 input-primary placeholder:text-primary"
+              size="small"
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                "& .MuiInputBase-input::placeholder": {
+                  color: "primary.main",
+                  opacity: 1,
+                },
+              }}
             />
-            <button type="submit" className="btn btn-square text-primary ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+            <IconButton
+              type="submit"
+              color="primary"
+              aria-label="Search"
+              sx={{ ml: 0.5 }}
+            >
+              <SearchIcon />
+            </IconButton>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

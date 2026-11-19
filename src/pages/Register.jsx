@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth";
 import useAxios from "../hooks/useAxios";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
+import Link from "@mui/material/Link";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 const Register = () => {
   const { register, updateUserData, signUpWithGoogle } = useAuth();
@@ -77,100 +85,106 @@ const Register = () => {
       });
   };
   return (
-    <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content w-full px-4">
-        <div className="card  w-full max-w-sm shadow-2xl bg-base-100">
-          <h1 className="text-3xl sm:text-4xl playfair font-bold text-center my-4 text-primary">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "grey.100",
+        px: 2,
+        py: 4,
+      }}
+    >
+      <Card sx={{ width: "100%", maxWidth: 448 }} elevation={6}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            align="center"
+            fontWeight="bold"
+            color="primary"
+            className="playfair"
+            gutterBottom
+          >
             Register now!
-          </h1>
+          </Typography>
 
-          <form className="card-body" onSubmit={handleSubmit}>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Name</span>
-              </label>
-              <input
-                type="text"
-                placeholder="name"
-                name="name"
-                className="input input-bordered focus:input-primary"
-                
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Photo Url</span>
-              </label>
-              <input
-                type="text"
-                placeholder="photo url"
-                className="input input-bordered focus:input-primary"
-                name="photo"
-                
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                placeholder="email"
-                name="email"
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text ">Password</span>
-              </label>
-              <input
-                type="password"
-                placeholder="password"
-                name="password"
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
-            <div className="form-control mt-6">
-              <button
-                className="btn btn-primary"
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Registering...
-                  </>
-                ) : (
-                  "Register"
-                )}
-              </button>
-            </div>
-          </form>
-          <p className="px-7  pt-4">
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <TextField
+              type="text"
+              label="Name"
+              placeholder="name"
+              name="name"
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              type="text"
+              label="Photo Url"
+              placeholder="photo url"
+              name="photo"
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              type="email"
+              label="Email"
+              placeholder="email"
+              name="email"
+              required
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              type="password"
+              label="Password"
+              placeholder="password"
+              name="password"
+              required
+              fullWidth
+              margin="normal"
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              disabled={isSubmitting}
+              sx={{ mt: 3 }}
+            >
+              {isSubmitting ? (
+                <>
+                  <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
+                  Registering...
+                </>
+              ) : (
+                "Register"
+              )}
+            </Button>
+          </Box>
+          <Typography variant="body2" align="center" sx={{ mt: 3 }}>
             {" "}
             Already Have an account ?{" "}
-            <Link className="link link-primary" to={"/login"}>
+            <Link component={RouterLink} to={"/login"} underline="hover">
               {" "}
               log in
             </Link>
-          </p>
-          <div className="card-body py-5">
-            <button
-              className="btn btn-outline btn-primary"
-              onClick={googleClickHangler}
-              disabled={isSubmitting}
-            >
-              Sign in with Google
-              <FcGoogle></FcGoogle>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Typography>
+          <Button
+            variant="outlined"
+            color="primary"
+            fullWidth
+            onClick={googleClickHangler}
+            disabled={isSubmitting}
+            startIcon={<FcGoogle />}
+            sx={{ mt: 3 }}
+          >
+            Sign in with Google
+          </Button>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

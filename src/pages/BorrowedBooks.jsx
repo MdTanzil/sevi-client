@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import useAxios from "../hooks/useAxios";
 import BorrowCard from "../components/BorrowCard";
 
@@ -17,7 +18,7 @@ const BorrowedBooks = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={56} />
       </div>
     );
   }
@@ -25,13 +26,18 @@ const BorrowedBooks = () => {
   if (isError) {
     return (
       <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Could not load your borrowed books</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+        <Typography variant="h5" component="p" fontWeight="bold">
+          Could not load your borrowed books
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          className="poppins mt-4"
           onClick={() => refetch()}
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -40,7 +46,10 @@ const BorrowedBooks = () => {
     <div>
       {" "}
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Borrowed</span> Books
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Borrowed
+        </Box>{" "}
+        Books
       </h1>
       {data.length <= 0 && (
         <div className="my-48 text-center text-2xl font-bold">

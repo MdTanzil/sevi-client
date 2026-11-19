@@ -1,6 +1,10 @@
 import { useParams } from "react-router-dom";
 import useAxios from "../hooks/useAxios";
 import { useQuery } from "@tanstack/react-query";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import BookCard from "./BookCard";
 
 const BooksAllCategory = () => {
@@ -16,34 +20,52 @@ const BooksAllCategory = () => {
   });
   if (isLoading) {
     return (
-      <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
-      </div>
+      <Box className="flex justify-center my-48">
+        <CircularProgress size={56} />
+      </Box>
     );
   }
 
   if (isError) {
     return (
-      <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Could not load the books</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+      <Box className="my-48 text-center">
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          Could not load the books
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
           onClick={() => refetch()}
         >
           Try again
-        </button>
-      </div>
+        </Button>
+      </Box>
     );
   }
   return (
     <div>
-      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair mt-5">
-        <span className="text-secondary">{category}</span> Books
-      </h1>
+      <Typography
+        component="h1"
+        className="playfair"
+        sx={{
+          fontSize: { xs: "1.875rem", sm: "2.25rem" },
+          fontWeight: 700,
+          textAlign: "center",
+          mt: 2.5,
+        }}
+      >
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          {category}
+        </Box>{" "}
+        Books
+      </Typography>
       {data.length <= 0 && (
-        <div className="my-48 text-center text-2xl font-bold">
-          Do not have any Books{" "}
-        </div>
+        <Box className="my-48 text-center">
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            Do not have any Books{" "}
+          </Typography>
+        </Box>
       )}
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {data?.map((d) => (

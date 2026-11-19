@@ -4,6 +4,10 @@ import useProfile from "../hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import BookForm from "../components/BookForm";
 
 const UpdateBook = () => {
@@ -32,46 +36,58 @@ const UpdateBook = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
-      </div>
+      <Box className="flex justify-center my-48">
+        <CircularProgress size={56} />
+      </Box>
     );
   }
 
   if (isError || !book) {
     return (
-      <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Could not load this book</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+      <Box className="my-48 text-center">
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          Could not load this book
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
           onClick={() => refetch()}
         >
           Try again
-        </button>
-      </div>
+        </Button>
+      </Box>
     );
   }
 
   if (profileLoading) {
     return (
-      <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
-      </div>
+      <Box className="flex justify-center my-48">
+        <CircularProgress size={56} />
+      </Box>
     );
   }
 
   // UI-only gating — the server enforces who can update books.
   if (!canManageBooks) {
     return (
-      <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Librarians and admins only</p>
-        <p className="mt-2">
+      <Box className="my-48 text-center">
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          Librarians and admins only
+        </Typography>
+        <Typography sx={{ mt: 1 }}>
           Only librarians and admins can update books in the library.
-        </p>
-        <Link to="/all-book" className="btn btn-sm btn-primary poppins mt-4">
+        </Typography>
+        <Button
+          component={Link}
+          to="/all-book"
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
+        >
           Browse books
-        </Link>
-      </div>
+        </Button>
+      </Box>
     );
   }
 
@@ -94,9 +110,20 @@ const UpdateBook = () => {
   };
   return (
     <div className="mt-5">
-      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Update</span> Books
-      </h1>
+      <Typography
+        component="h1"
+        className="playfair"
+        sx={{
+          fontSize: { xs: "1.875rem", sm: "2.25rem" },
+          fontWeight: 700,
+          textAlign: "center",
+        }}
+      >
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Update
+        </Box>{" "}
+        Books
+      </Typography>
       <div className="mt-6">
         <BookForm
           key={id}

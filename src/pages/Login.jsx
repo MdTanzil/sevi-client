@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import useAxios from "../hooks/useAxios";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
+import Link from "@mui/material/Link";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 const Login = () => {
     const { signUpWithGoogle, login ,setUser } = useAuth();
@@ -61,84 +69,103 @@ const Login = () => {
         });
     };
     return (
-      <div className="hero min-h-screen bg-base-200">
-        <div className="hero-content w-full px-4">
-          <div className="card  w-full max-w-sm shadow-2xl bg-base-100">
-            <h1 className="text-3xl sm:text-4xl playfair font-bold text-center my-4">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "grey.100",
+          px: 2,
+          py: 4,
+        }}
+      >
+        <Card sx={{ width: "100%", maxWidth: 448 }} elevation={6}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              align="center"
+              fontWeight="bold"
+              className="playfair"
+              gutterBottom
+            >
               Login now!
-            </h1>
+            </Typography>
 
-            <form className="card-body" onSubmit={handleLogin}>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  placeholder="email"
-                  className="input input-bordered focus:input-primary"
-                  name="email"
-                  required
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Password</span>
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="password"
-                  className="input input-bordered focus:input-primary"
-                  required
-                />
-                <label className="label">
-                  <Link
-                    to="/forgot-password"
-                    className="label-text-alt link link-hover"
-                  >
-                    Forgot password?
-                  </Link>
-                </label>
-              </div>
-              <div className="form-control mt-6">
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  disabled={isSubmitting}
+            <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
+              <TextField
+                type="email"
+                label="Email"
+                placeholder="email"
+                name="email"
+                required
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                type="password"
+                label="Password"
+                placeholder="password"
+                name="password"
+                required
+                fullWidth
+                margin="normal"
+              />
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
+                <Link
+                  component={RouterLink}
+                  to="/forgot-password"
+                  underline="hover"
+                  variant="body2"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Logging in...
-                    </>
-                  ) : (
-                    "Login"
-                  )}
-                </button>
-              </div>
-            </form>
-            <p className="px-4">
+                  Forgot password?
+                </Link>
+              </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={isSubmitting}
+                sx={{ mt: 3 }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <CircularProgress
+                      size={16}
+                      color="inherit"
+                      sx={{ mr: 1 }}
+                    />
+                    Logging in...
+                  </>
+                ) : (
+                  "Login"
+                )}
+              </Button>
+            </Box>
+            <Typography variant="body2" align="center" sx={{ mt: 3 }}>
               {" "}
               Do not Have an account yet?{" "}
-              <Link to={"/register"} className="link link-primary">
+              <Link component={RouterLink} to={"/register"} underline="hover">
                 {" "}
                 create account
               </Link>
-            </p>
-            <div className="card-body">
-              <button
-                className="btn btn-outline btn-primary"
-                onClick={googleClickHandler}
-                disabled={isSubmitting}
-              >
-                Sign in with Google
-                <FcGoogle></FcGoogle>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={googleClickHandler}
+              disabled={isSubmitting}
+              startIcon={<FcGoogle />}
+              sx={{ mt: 3 }}
+            >
+              Sign in with Google
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
     );
 };
 

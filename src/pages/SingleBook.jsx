@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
-import {  useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
 import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
@@ -89,23 +94,27 @@ const SingleBook = () => {
   };
   if (isLoading) {
     return (
-      <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
-      </div>
+      <Box className="flex justify-center my-48">
+        <CircularProgress size={56} />
+      </Box>
     );
   }
 
   if (isError || !book) {
     return (
-      <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Could not load this book</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+      <Box className="my-48 text-center">
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          Could not load this book
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
           onClick={() => refetch()}
         >
           Try again
-        </button>
-      </div>
+        </Button>
+      </Box>
     );
   }
   const {
@@ -212,126 +221,227 @@ const SingleBook = () => {
     //
   }
   return (
-    <div className="px-2">
-      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Book</span> Details
-      </h1>
-      <div className="mt-5">
-        <div className="flex flex-col w-full lg:flex-row items-center">
-          <div className="grid  card  rounded-box place-items-center">
+    <Box className="px-2">
+      <Typography
+        component="h1"
+        className="playfair"
+        sx={{
+          fontSize: { xs: "1.875rem", sm: "2.25rem" },
+          fontWeight: 700,
+          textAlign: "center",
+        }}
+      >
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Book
+        </Box>{" "}
+        Details
+      </Typography>
+      <Box sx={{ mt: 2.5 }}>
+        <Box className="flex flex-col w-full lg:flex-row items-center">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <SafeImage
               src={imageUrl}
               className="rounded-lg h-[300px] w-[200px] sm:h-[350px] sm:w-[230px] object-cover"
               alt={name}
             />
-            <p> {category}</p>
-            <div className="flex flex-wrap justify-center gap-2 w-full">
-              <button
+            <Typography sx={{ mt: 1 }}>{category}</Typography>
+            <Box className="flex flex-wrap justify-center gap-2 w-full">
+              <Button
                 onClick={handleBorrow}
                 disabled={quantity < 1 || atBorrowLimit}
-                className=" btn btn-sm btn-secondary text-black font-normal normal-case"
+                variant="contained"
+                color="secondary"
+                size="small"
+                sx={{ color: "#000", textTransform: "none", fontWeight: 400 }}
               >
                 Borrow
-              </button>
-              <button onClick={handleReadButton} className="btn btn-sm btn-secondary text-black font-normal normal-case">
+              </Button>
+              <Button
+                onClick={handleReadButton}
+                variant="contained"
+                color="secondary"
+                size="small"
+                sx={{ color: "#000", textTransform: "none", fontWeight: 400 }}
+              >
                 Read
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleWishlistToggle}
                 disabled={isWishlistBusy}
-                className="btn btn-sm btn-outline btn-secondary font-normal normal-case"
+                variant="outlined"
+                color="secondary"
+                size="small"
+                startIcon={
+                  isWishlisted ? (
+                    <FaHeart style={{ color: "#fdc800" }} />
+                  ) : (
+                    <FaRegHeart />
+                  )
+                }
+                sx={{ textTransform: "none", fontWeight: 400 }}
               >
-                {isWishlisted ? (
-                  <FaHeart className="text-secondary" />
-                ) : (
-                  <FaRegHeart />
-                )}
                 {isWishlisted ? "Wishlisted" : "Wishlist"}
-              </button>
-            </div>
+              </Button>
+            </Box>
             {quantity < 1 && (
-              <p className="text-xs text-error mt-1 text-center px-2">
+              <Typography
+                variant="caption"
+                color="error"
+                sx={{ mt: 0.5, textAlign: "center", px: 1 }}
+              >
                 Out of stock — Borrow is unavailable right now. Add it to
                 your wishlist and we will notify you when it is back.
-              </p>
+              </Typography>
             )}
             {atBorrowLimit && (
-              <p className="text-xs text-warning mt-1">
+              <Typography variant="caption" color="warning" sx={{ mt: 0.5 }}>
                 Borrow limit reached ({MAX_ACTIVE_BORROWS}/{MAX_ACTIVE_BORROWS})
                 — return a book to borrow another.
-              </p>
+              </Typography>
             )}
-          </div>
-          <div className="divider lg:divider-horizontal"></div>
-          <div className="grid flex-1   bg-base-100 rounded-box p-1">
-            <div className="p-2">
-              <h2 className=" text-2xl font-semibold text-center playfair">
+          </Box>
+          <Divider
+            sx={{ display: { xs: "block", lg: "none" }, width: "100%", my: 2 }}
+          />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ display: { xs: "none", lg: "block" }, mx: 2 }}
+          />
+          <Box
+            sx={{
+              flex: 1,
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              p: 0.5,
+              width: "100%",
+            }}
+          >
+            <Box sx={{ p: 1 }}>
+              <Typography
+                component="h2"
+                variant="h5"
+                className="playfair"
+                sx={{ fontWeight: 600, textAlign: "center" }}
+              >
                 {name}
-              </h2>
-              <h4 className="text-lg font-medium ">
-                Author: <span className="text-primary playfair">{author}</span>{" "}
-              </h4>
-              <p className="mt-2">
+              </Typography>
+              <Typography
+                component="h4"
+                sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+              >
+                Author:{" "}
+                <Box
+                  component="span"
+                  className="playfair"
+                  sx={{ color: "primary.main" }}
+                >
+                  {author}
+                </Box>{" "}
+              </Typography>
+              <Typography sx={{ mt: 1 }}>
                 {" "}
-                <span className="text-lg font-medium">
+                <Box
+                  component="span"
+                  sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                >
                   Available Copies :
-                </span>{" "}
+                </Box>{" "}
                 {quantity}
-              </p>
-              <p className="mt-2">
-                <span className="text-lg font-medium">Category : </span>
+              </Typography>
+              <Typography sx={{ mt: 1 }}>
+                <Box
+                  component="span"
+                  sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                >
+                  Category :{" "}
+                </Box>
                 {category}
-              </p>
+              </Typography>
               {isbn && (
-                <p className="mt-2">
-                  <span className="text-lg font-medium">ISBN : </span>
+                <Typography sx={{ mt: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                  >
+                    ISBN :{" "}
+                  </Box>
                   {isbn}
-                </p>
+                </Typography>
               )}
               {publisher && (
-                <p className="mt-2">
-                  <span className="text-lg font-medium">Publisher : </span>
+                <Typography sx={{ mt: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                  >
+                    Publisher :{" "}
+                  </Box>
                   {publisher}
-                </p>
+                </Typography>
               )}
               {publishedYear && (
-                <p className="mt-2">
-                  <span className="text-lg font-medium">
+                <Typography sx={{ mt: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                  >
                     Published Year :{" "}
-                  </span>
+                  </Box>
                   {publishedYear}
-                </p>
+                </Typography>
               )}
               {language && (
-                <p className="mt-2">
-                  <span className="text-lg font-medium">Language : </span>
+                <Typography sx={{ mt: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                  >
+                    Language :{" "}
+                  </Box>
                   {language}
-                </p>
+                </Typography>
               )}
               {pages && (
-                <p className="mt-2">
-                  <span className="text-lg font-medium">Pages : </span>
+                <Typography sx={{ mt: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+                  >
+                    Pages :{" "}
+                  </Box>
                   {pages}
-                </p>
+                </Typography>
               )}
-              <div className="my-1">
+              <Box sx={{ my: 0.5 }}>
                 <Rating
                   style={{ maxWidth: 120 }}
                   value={(rating || 0) / 2}
                   readOnly
                   className="ml-0 lg:ml-2"
                 />
-                <div className="mt-1">{`Review : ${getRating(
+                <Typography sx={{ mt: 0.5 }}>{`Review : ${getRating(
                   Math.round(rating / 2)
-                )}`}</div>
-              </div>
-              <h4 className="text-lg font-medium">Short Description :</h4>
-              <p className="mt-3"> {shortDescription}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                )}`}</Typography>
+              </Box>
+              <Typography
+                component="h4"
+                sx={{ fontSize: "1.125rem", fontWeight: 500 }}
+              >
+                Short Description :
+              </Typography>
+              <Typography sx={{ mt: 1.5 }}> {shortDescription}</Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

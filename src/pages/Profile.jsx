@@ -8,6 +8,23 @@ import {
   updatePassword,
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
@@ -57,15 +74,15 @@ const formatDate = (value) => {
 const DueBadge = ({ record }) => {
   const status = getDueStatus(record);
   if (status === "returned") {
-    return <span className="badge badge-success">Returned</span>;
+    return <Chip label="Returned" color="success" size="small" />;
   }
   if (status === "overdue") {
-    return <span className="badge badge-error text-white">Overdue</span>;
+    return <Chip label="Overdue" color="error" size="small" />;
   }
   if (status === "due-soon") {
-    return <span className="badge badge-warning">Due soon</span>;
+    return <Chip label="Due soon" color="warning" size="small" />;
   }
-  return <span className="badge badge-info">Borrowed</span>;
+  return <Chip label="Borrowed" color="info" size="small" />;
 };
 
 DueBadge.propTypes = {
@@ -113,7 +130,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={48} />
       </div>
     );
   }
@@ -122,12 +139,14 @@ const Profile = () => {
     return (
       <div className="my-48 text-center">
         <p className="text-2xl font-bold">Could not load your profile</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+        <Button
+          variant="contained"
+          size="small"
           onClick={() => refetch()}
+          sx={{ mt: 2 }}
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -228,12 +247,28 @@ const Profile = () => {
   return (
     <div className="mt-5">
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">My</span> Profile
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          My
+        </Box>{" "}
+        Profile
       </h1>
 
       {/* Virtual membership card */}
-      <div className="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl max-w-2xl mx-auto mt-6">
-        <div className="card-body p-5 sm:p-8">
+      <Card
+        elevation={4}
+        className="max-w-2xl mx-auto mt-6"
+        sx={{
+          color: "white",
+          background: (theme) =>
+            `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+        }}
+      >
+        <CardContent
+          sx={{
+            p: { xs: 2.5, sm: 4 },
+            "&:last-child": { pb: { xs: 2.5, sm: 4 } },
+          }}
+        >
           <div className="flex justify-between items-start gap-4">
             <div>
               <p className="text-xs tracking-[0.3em] opacity-80">
@@ -244,9 +279,17 @@ const Profile = () => {
               </h2>
               <p className="opacity-90 break-all">{profile.email}</p>
             </div>
-            <span className="badge bg-white/20 border-white/40 text-white capitalize shrink-0">
-              {profile.role}
-            </span>
+            <Chip
+              label={profile.role}
+              size="small"
+              sx={{
+                backgroundColor: "rgba(255,255,255,0.2)",
+                border: "1px solid rgba(255,255,255,0.4)",
+                color: "white",
+                textTransform: "capitalize",
+                flexShrink: 0,
+              }}
+            />
           </div>
           <div className="flex flex-wrap justify-between gap-2 mt-4 text-sm">
             <span>Member since: {formatDate(profile.createdAt)}</span>
@@ -254,128 +297,134 @@ const Profile = () => {
               Borrowed: {activeBorrows.length}/{MAX_ACTIVE_BORROWS} books
             </span>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto mt-6">
         {/* Edit profile */}
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body p-4 sm:p-8">
-            <h2 className="card-title">Edit profile</h2>
+        <Card elevation={4}>
+          <CardContent
+            sx={{
+              p: { xs: 2, sm: 4 },
+              "&:last-child": { pb: { xs: 2, sm: 4 } },
+            }}
+          >
+            <Typography variant="h6" component="h2" gutterBottom>
+              Edit profile
+            </Typography>
             <form key={profile.email} onSubmit={handleUpdateProfile}>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Name</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  defaultValue={profile.name || ""}
-                  placeholder="Your name"
-                  className="input input-bordered focus:input-primary"
-                />
-              </div>
-              <div className="form-control mt-3">
-                <label className="label">
-                  <span className="label-text">Phone</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  defaultValue={profile.phone || ""}
-                  placeholder="Your phone number"
-                  className="input input-bordered focus:input-primary"
-                />
-              </div>
-              <div className="form-control mt-3">
-                <label className="label">
-                  <span className="label-text">Address</span>
-                </label>
-                <textarea
-                  name="address"
-                  defaultValue={profile.address || ""}
-                  placeholder="Your address"
-                  className="textarea textarea-bordered focus:textarea-primary h-24"
-                ></textarea>
-              </div>
-              <div className="form-control mt-6">
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  disabled={isSavingProfile}
-                >
-                  {isSavingProfile ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Saving...
-                    </>
-                  ) : (
-                    "Save changes"
-                  )}
-                </button>
-              </div>
+              <TextField
+                fullWidth
+                label="Name"
+                type="text"
+                name="name"
+                defaultValue={profile.name || ""}
+                placeholder="Your name"
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                label="Phone"
+                type="tel"
+                name="phone"
+                defaultValue={profile.phone || ""}
+                placeholder="Your phone number"
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Address"
+                name="address"
+                defaultValue={profile.address || ""}
+                placeholder="Your address"
+                margin="normal"
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                type="submit"
+                disabled={isSavingProfile}
+                sx={{ mt: 3 }}
+              >
+                {isSavingProfile ? (
+                  <>
+                    <CircularProgress
+                      size={16}
+                      color="inherit"
+                      sx={{ mr: 1 }}
+                    />
+                    Saving...
+                  </>
+                ) : (
+                  "Save changes"
+                )}
+              </Button>
             </form>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Account security: password + email */}
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body p-4 sm:p-8">
-            <h2 className="card-title">Change password</h2>
+        <Card elevation={4}>
+          <CardContent
+            sx={{
+              p: { xs: 2, sm: 4 },
+              "&:last-child": { pb: { xs: 2, sm: 4 } },
+            }}
+          >
+            <Typography variant="h6" component="h2" gutterBottom>
+              Change password
+            </Typography>
             {hasPasswordProvider ? (
               <form onSubmit={handleChangePassword}>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Current password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    placeholder="Current password"
-                    className="input input-bordered focus:input-primary"
-                    required
-                  />
-                </div>
-                <div className="form-control mt-3">
-                  <label className="label">
-                    <span className="label-text">New password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="newPassword"
-                    placeholder="New password"
-                    className="input input-bordered focus:input-primary"
-                    required
-                  />
-                </div>
-                <div className="form-control mt-3">
-                  <label className="label">
-                    <span className="label-text">Confirm new password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm new password"
-                    className="input input-bordered focus:input-primary"
-                    required
-                  />
-                </div>
-                <div className="form-control mt-6">
-                  <button
-                    className="btn btn-primary"
-                    type="submit"
-                    disabled={isChangingPassword}
-                  >
-                    {isChangingPassword ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Changing...
-                      </>
-                    ) : (
-                      "Change password"
-                    )}
-                  </button>
-                </div>
+                <TextField
+                  fullWidth
+                  label="Current password"
+                  type="password"
+                  name="currentPassword"
+                  placeholder="Current password"
+                  margin="normal"
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="New password"
+                  type="password"
+                  name="newPassword"
+                  placeholder="New password"
+                  margin="normal"
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Confirm new password"
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm new password"
+                  margin="normal"
+                  required
+                />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="submit"
+                  disabled={isChangingPassword}
+                  sx={{ mt: 3 }}
+                >
+                  {isChangingPassword ? (
+                    <>
+                      <CircularProgress
+                        size={16}
+                        color="inherit"
+                        sx={{ mr: 1 }}
+                      />
+                      Changing...
+                    </>
+                  ) : (
+                    "Change password"
+                  )}
+                </Button>
               </form>
             ) : (
               <p className="text-sm opacity-70">
@@ -384,56 +433,56 @@ const Profile = () => {
               </p>
             )}
 
-            <div className="divider"></div>
+            <Divider sx={{ my: 3 }} />
 
-            <h2 className="card-title">Change email</h2>
+            <Typography variant="h6" component="h2" gutterBottom>
+              Change email
+            </Typography>
             {hasPasswordProvider ? (
               <form onSubmit={handleChangeEmail}>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">New email</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="newEmail"
-                    placeholder="New email address"
-                    className="input input-bordered focus:input-primary"
-                    required
-                  />
-                </div>
-                <div className="form-control mt-3">
-                  <label className="label">
-                    <span className="label-text">Current password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    placeholder="Current password"
-                    className="input input-bordered focus:input-primary"
-                    required
-                  />
-                </div>
+                <TextField
+                  fullWidth
+                  label="New email"
+                  type="email"
+                  name="newEmail"
+                  placeholder="New email address"
+                  margin="normal"
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Current password"
+                  type="password"
+                  name="currentPassword"
+                  placeholder="Current password"
+                  margin="normal"
+                  required
+                />
                 <p className="text-sm opacity-70 mt-3">
                   A verification email will be sent to the new address. You
                   will be logged out and need to log in with the new email
                   after verifying it.
                 </p>
-                <div className="form-control mt-6">
-                  <button
-                    className="btn btn-primary"
-                    type="submit"
-                    disabled={isChangingEmail}
-                  >
-                    {isChangingEmail ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Changing...
-                      </>
-                    ) : (
-                      "Change email"
-                    )}
-                  </button>
-                </div>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="submit"
+                  disabled={isChangingEmail}
+                  sx={{ mt: 3 }}
+                >
+                  {isChangingEmail ? (
+                    <>
+                      <CircularProgress
+                        size={16}
+                        color="inherit"
+                        sx={{ mr: 1 }}
+                      />
+                      Changing...
+                    </>
+                  ) : (
+                    "Change email"
+                  )}
+                </Button>
               </form>
             ) : (
               <p className="text-sm opacity-70">
@@ -441,27 +490,36 @@ const Profile = () => {
                 by Google and cannot be changed here.
               </p>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Borrow history */}
-      <div className="card bg-base-100 shadow-xl max-w-4xl mx-auto mt-6 mb-6">
-        <div className="card-body p-4 sm:p-8">
-          <h2 className="card-title">Borrow history</h2>
+      <Card elevation={4} className="max-w-4xl mx-auto mt-6 mb-6">
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 4 },
+            "&:last-child": { pb: { xs: 2, sm: 4 } },
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            Borrow history
+          </Typography>
           {isHistoryLoading ? (
             <div className="flex justify-center my-8">
-              <span className="loading loading-bars loading-lg"></span>
+              <CircularProgress size={48} />
             </div>
           ) : isHistoryError ? (
             <div className="text-center my-8">
               <p className="font-bold">Could not load your borrow history</p>
-              <button
-                className="btn btn-sm btn-primary poppins mt-4"
+              <Button
+                variant="contained"
+                size="small"
                 onClick={() => refetchHistory()}
+                sx={{ mt: 2 }}
               >
                 Try again
-              </button>
+              </Button>
             </div>
           ) : history.length === 0 ? (
             <p className="text-center my-8 opacity-70">
@@ -475,12 +533,12 @@ const Profile = () => {
                   const status = getDueStatus(record);
                   const border =
                     status === "overdue"
-                      ? "border-error"
+                      ? "border-red-500"
                       : status === "due-soon"
-                      ? "border-warning"
+                      ? "border-amber-500"
                       : status === "returned"
-                      ? "border-success"
-                      : "border-base-300";
+                      ? "border-green-500"
+                      : "border-gray-300";
                   return (
                     <div
                       key={record._id}
@@ -506,52 +564,54 @@ const Profile = () => {
               </div>
               {/* Desktop: the full table. Overdue rows are red,
                   due-soon rows are amber. */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>Book</th>
-                      <th>Borrowed</th>
-                      <th>Due</th>
-                      <th>Returned</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <TableContainer className="hidden md:block">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Book</TableCell>
+                      <TableCell>Borrowed</TableCell>
+                      <TableCell>Due</TableCell>
+                      <TableCell>Returned</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
                     {history.map((record) => {
                       const status = getDueStatus(record);
                       const rowClass =
                         status === "overdue"
-                          ? "bg-error/10"
+                          ? "bg-red-50"
                           : status === "due-soon"
-                          ? "bg-warning/10"
+                          ? "bg-amber-50"
                           : "";
                       return (
-                        <tr key={record._id} className={rowClass}>
-                          <td>
+                        <TableRow key={record._id} className={rowClass}>
+                          <TableCell>
                             <div className="font-medium">
                               {record.bookName}
                             </div>
                             <div className="text-sm opacity-70">
                               by {record.author}
                             </div>
-                          </td>
-                          <td>{record.borrowedDate || "—"}</td>
-                          <td>{record.retunDate || "—"}</td>
-                          <td>{record.returnedDate || "Not returned"}</td>
-                          <td>
+                          </TableCell>
+                          <TableCell>{record.borrowedDate || "—"}</TableCell>
+                          <TableCell>{record.retunDate || "—"}</TableCell>
+                          <TableCell>
+                            {record.returnedDate || "Not returned"}
+                          </TableCell>
+                          <TableCell>
                             <DueBadge record={record} />
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

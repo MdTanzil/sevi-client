@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PropTypes } from "prop-types";
+import Box from "@mui/material/Box";
 import { FaBookOpen } from "react-icons/fa";
 
 /**
@@ -12,15 +13,14 @@ const SafeImage = ({ src, alt, className, iconClassName }) => {
 
   if (!src || failed) {
     return (
-      <div
-        className={`flex items-center justify-center bg-base-200 text-primary ${
-          className || ""
-        }`}
+      <Box
+        className={`flex items-center justify-center ${className || ""}`}
+        sx={{ bgcolor: "grey.200", color: "primary.main" }}
         role="img"
         aria-label={alt}
       >
         <FaBookOpen className={iconClassName || "w-10 h-10 opacity-60"} />
-      </div>
+      </Box>
     );
   }
 

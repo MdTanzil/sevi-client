@@ -1,5 +1,21 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
@@ -51,7 +67,7 @@ const UsersAdmin = () => {
   if (profileLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={48} />
       </div>
     );
   }
@@ -63,9 +79,15 @@ const UsersAdmin = () => {
         <p className="mt-2">
           Only admins can manage users and their roles.
         </p>
-        <Link to="/all-book" className="btn btn-sm btn-primary poppins mt-4">
+        <Button
+          component={Link}
+          to="/all-book"
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
+        >
           Browse books
-        </Link>
+        </Button>
       </div>
     );
   }
@@ -73,7 +95,7 @@ const UsersAdmin = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={48} />
       </div>
     );
   }
@@ -82,12 +104,14 @@ const UsersAdmin = () => {
     return (
       <div className="my-48 text-center">
         <p className="text-2xl font-bold">Could not load users</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+        <Button
+          variant="contained"
+          size="small"
           onClick={() => refetch()}
+          sx={{ mt: 2 }}
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -95,10 +119,18 @@ const UsersAdmin = () => {
   return (
     <div className="mt-5">
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Manage</span> Users
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Manage
+        </Box>{" "}
+        Users
       </h1>
-      <div className="card bg-base-100 shadow-xl max-w-4xl mx-auto mt-6 mb-6">
-        <div className="card-body p-4 sm:p-8">
+      <Card elevation={4} className="max-w-4xl mx-auto mt-6 mb-6">
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 4 },
+            "&:last-child": { pb: { xs: 2, sm: 4 } },
+          }}
+        >
           {users.length === 0 ? (
             <p className="text-center my-8 opacity-70">No users yet.</p>
           ) : (
@@ -112,12 +144,12 @@ const UsersAdmin = () => {
                   return (
                     <div
                       key={member.email}
-                      className="rounded-lg border border-base-300 p-3"
+                      className="rounded-lg border border-gray-300 p-3"
                     >
                       <p className="font-medium">
                         {member.name || "—"}
                         {isSelf && (
-                          <span className="badge badge-ghost ml-2">You</span>
+                          <Chip label="You" size="small" sx={{ ml: 1 }} />
                         )}
                       </p>
                       <p className="text-sm opacity-70 break-all">
@@ -126,8 +158,8 @@ const UsersAdmin = () => {
                       <p className="text-sm opacity-70 mt-1">
                         Member since: {formatDate(member.createdAt)}
                       </p>
-                      <select
-                        className="select select-bordered select-sm capitalize w-full mt-3"
+                      <Select
+                        size="small"
                         value={member.role}
                         disabled={isSelf}
                         title={
@@ -138,46 +170,65 @@ const UsersAdmin = () => {
                         onChange={(e) =>
                           handleRoleChange(member.email, e.target.value)
                         }
+                        sx={{
+                          width: "100%",
+                          mt: 1.5,
+                          textTransform: "capitalize",
+                        }}
                       >
                         {ROLES.map((role) => (
-                          <option key={role} value={role}>
+                          <MenuItem
+                            key={role}
+                            value={role}
+                            sx={{ textTransform: "capitalize" }}
+                          >
                             {role}
-                          </option>
+                          </MenuItem>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                   );
                 })}
               </div>
               {/* Desktop: the full table. */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Member since</th>
-                      <th>Role</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <TableContainer className="hidden md:block">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Member since</TableCell>
+                      <TableCell>Role</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody
+                    sx={{
+                      "& .MuiTableRow-root:nth-of-type(odd)": {
+                        backgroundColor: "action.hover",
+                      },
+                    }}
+                  >
                     {users.map((member) => {
                       const isSelf =
                         member.email?.toLowerCase() ===
                         user?.email?.toLowerCase();
                       return (
-                        <tr key={member.email}>
-                          <td className="font-medium">
+                        <TableRow key={member.email}>
+                          <TableCell sx={{ fontWeight: 500 }}>
                             {member.name || "—"}
                             {isSelf && (
-                              <span className="badge badge-ghost ml-2">You</span>
+                              <Chip label="You" size="small" sx={{ ml: 1 }} />
                             )}
-                          </td>
-                          <td className="break-all">{member.email}</td>
-                          <td>{formatDate(member.createdAt)}</td>
-                          <td>
-                            <select
-                              className="select select-bordered select-sm capitalize"
+                          </TableCell>
+                          <TableCell className="break-all">
+                            {member.email}
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(member.createdAt)}
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              size="small"
                               value={member.role}
                               disabled={isSelf}
                               title={
@@ -188,24 +239,29 @@ const UsersAdmin = () => {
                               onChange={(e) =>
                                 handleRoleChange(member.email, e.target.value)
                               }
+                              sx={{ textTransform: "capitalize" }}
                             >
                               {ROLES.map((role) => (
-                                <option key={role} value={role}>
+                                <MenuItem
+                                  key={role}
+                                  value={role}
+                                  sx={{ textTransform: "capitalize" }}
+                                >
                                   {role}
-                                </option>
+                                </MenuItem>
                               ))}
-                            </select>
-                          </td>
-                        </tr>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

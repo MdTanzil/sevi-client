@@ -1,6 +1,17 @@
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import {
+  Badge,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import useAuth from "../hooks/useAuth";
 import useAxios from "../hooks/useAxios";
 import toast from "react-hot-toast";
@@ -14,6 +25,8 @@ const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const menuOpen = Boolean(anchorEl);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications"],
@@ -33,6 +46,14 @@ const NotificationBell = () => {
   const refresh = () =>
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   const handleOpen = async (notification) => {
     if (!notification.read) {
       try {
@@ -42,10 +63,8 @@ const NotificationBell = () => {
         // The notification still opens — marking it read is secondary.
       }
     }
-    // Move focus away so the dropdown closes before navigating.
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+    // Close the menu before navigating.
+    handleMenuClose();
     navigate(`/books-details/${notification.bookId}`);
   };
 
@@ -61,71 +80,96 @@ const NotificationBell = () => {
   if (!user) return null;
 
   return (
-    <div className="dropdown dropdown-end">
-      <label
-        tabIndex={0}
-        className="btn btn-ghost btn-circle"
+    <>
+      <IconButton
+        color="inherit"
         aria-label="Notifications"
+        onClick={handleMenuOpen}
+        aria-controls={menuOpen ? "notifications-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={menuOpen ? "true" : undefined}
       >
-        <div className="indicator">
-          <FaBell className="h-5 w-5" />
+        <Badge badgeContent={unreadCount} color="secondary">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
+      <Menu
+        id="notifications-menu"
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 320,
+              maxWidth: "calc(100vw - 2rem)",
+              mt: 1.5,
+              p: 1,
+            },
+          },
+          list: {
+            sx: { maxHeight: 320, overflowY: "auto", p: 0 },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 1,
+            pb: 1,
+          }}
+        >
+          <Typography variant="subtitle1" fontWeight={600}>
+            Notifications
+          </Typography>
           {unreadCount > 0 && (
-            <span className="badge badge-secondary badge-sm indicator-item">
-              {unreadCount}
-            </span>
+            <Button size="small" onClick={handleMarkAllRead}>
+              Mark all read
+            </Button>
           )}
-        </div>
-      </label>
-      <div
-        tabIndex={0}
-        className="dropdown-content z-[1] card card-compact w-80 max-w-[calc(100vw-2rem)] p-2 shadow bg-base-100 mt-3"
-      >
-        <div className="card-body">
-          <div className="flex items-center justify-between">
-            <h3 className="card-title text-base">Notifications</h3>
-            {unreadCount > 0 && (
-              <button
-                className="btn btn-ghost btn-xs"
-                onClick={handleMarkAllRead}
+        </Box>
+        {notifications.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ px: 1, py: 1 }}>
+            No notifications yet. When a wishlisted book is back in
+            stock, you will see it here.
+          </Typography>
+        ) : (
+          notifications.map((notification) => (
+            <MenuItem
+              key={notification._id}
+              onClick={() => handleOpen(notification)}
+              sx={{
+                alignItems: "flex-start",
+                whiteSpace: "normal",
+                opacity: notification.read ? 0.6 : 1,
+                fontWeight: notification.read ? 400 : 500,
+              }}
+            >
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
               >
-                Mark all read
-              </button>
-            )}
-          </div>
-          {notifications.length === 0 ? (
-            <p className="text-sm opacity-70 py-2">
-              No notifications yet. When a wishlisted book is back in
-              stock, you will see it here.
-            </p>
-          ) : (
-            <ul className="menu p-0 max-h-80 overflow-y-auto">
-              {notifications.map((notification) => (
-                <li key={notification._id}>
-                  <button
-                    onClick={() => handleOpen(notification)}
-                    className={`text-left ${
-                      notification.read ? "opacity-60" : "font-medium"
-                    }`}
-                  >
-                    <span className="flex flex-col gap-0.5">
-                      <span>{notification.message}</span>
-                      <span className="text-xs opacity-70">
-                        {new Date(notification.createdAt).toLocaleString()}
-                      </span>
-                    </span>
-                    {!notification.read && (
-                      <span className="badge badge-secondary badge-xs ml-auto">
-                        New
-                      </span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </div>
+                <Typography variant="body2">{notification.message}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(notification.createdAt).toLocaleString()}
+                </Typography>
+              </Box>
+              {!notification.read && (
+                <Chip
+                  label="New"
+                  color="secondary"
+                  size="small"
+                  sx={{ ml: "auto" }}
+                />
+              )}
+            </MenuItem>
+          ))
+        )}
+      </Menu>
+    </>
   );
 };
 

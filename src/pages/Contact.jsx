@@ -1,6 +1,14 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import toast from "react-hot-toast";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Container from "@mui/material/Container";
+import Link from "@mui/material/Link";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 // Sevi has no support mailbox yet, so messages go to the project's public
 // issue tracker — a real channel the maintainer actually reads.
@@ -23,113 +31,143 @@ const Contact = () => {
   };
 
   return (
-    <div className="mt-5 max-w-4xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Contact</span> us
-      </h1>
-      <p className="text-center mt-4 opacity-80 max-w-2xl mx-auto">
+    <Container maxWidth="lg" sx={{ mt: 5 }}>
+      <Typography
+        variant="h3"
+        component="h1"
+        align="center"
+        fontWeight="bold"
+        className="playfair"
+        sx={{ fontSize: { xs: "1.875rem", sm: "2.25rem" } }}
+      >
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Contact
+        </Box>{" "}
+        us
+      </Typography>
+      <Typography
+        variant="body1"
+        align="center"
+        color="text.secondary"
+        sx={{ mt: 2, maxWidth: 672, mx: "auto" }}
+      >
         Questions about your membership, a book, or a problem with the site?
         Send us a message — most questions are already answered on the{" "}
-        <Link to="/faq" className="link link-primary">
+        <Link component={RouterLink} to="/faq" underline="hover">
           FAQ page
         </Link>
         .
-      </p>
+      </Typography>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 mb-6">
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body p-4 sm:p-8">
-            <h2 className="card-title">Send a message</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Name</span>
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                  className="input input-bordered focus:input-primary"
-                  required
-                />
-              </div>
-              <div className="form-control mt-3">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  className="input input-bordered focus:input-primary"
-                  required
-                />
-              </div>
-              <div className="form-control mt-3">
-                <label className="label">
-                  <span className="label-text">Message</span>
-                </label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="How can we help?"
-                  className="textarea textarea-bordered focus:textarea-primary h-32"
-                  required
-                ></textarea>
-              </div>
-              <div className="form-control mt-6">
-                <button className="btn btn-primary" type="submit">
-                  Send message
-                </button>
-              </div>
-              <p className="text-sm opacity-70 mt-3">
+        <Card elevation={4}>
+          <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+            <Typography variant="h6" component="h2" gutterBottom>
+              Send a message
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                type="text"
+                label="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                required
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                type="email"
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email address"
+                required
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label="Message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="How can we help?"
+                multiline
+                rows={4}
+                required
+                fullWidth
+                margin="normal"
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{ mt: 3 }}
+              >
+                Send message
+              </Button>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 2 }}
+              >
                 Sending opens the Sevi issue tracker with your message
                 filled in — press Submit there to deliver it.
-              </p>
-            </form>
-          </div>
-        </div>
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
         <div className="space-y-6">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <h2 className="card-title">Members</h2>
-              <p>
+          <Card elevation={4}>
+            <CardContent>
+              <Typography variant="h6" component="h2" gutterBottom>
+                Members
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 Borrowing questions, overdue books, or role requests are
                 fastest through your librarian — or check your profile page
                 for your current loans and due dates.
-              </p>
-              <div className="card-actions mt-2">
-                <Link to="/profile" className="btn btn-sm btn-outline btn-primary">
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  component={RouterLink}
+                  to="/profile"
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                >
                   My Profile
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <h2 className="card-title">Report a problem</h2>
-              <p>
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+          <Card elevation={4}>
+            <CardContent>
+              <Typography variant="h6" component="h2" gutterBottom>
+                Report a problem
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 Found a bug or a book with wrong details? You can also open
                 an issue directly on the Sevi GitHub repository.
-              </p>
-              <div className="card-actions mt-2">
-                <a
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  component="a"
                   href="https://github.com/MdTanzil/sevi-client/issues"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-sm btn-outline btn-primary"
+                  variant="outlined"
+                  color="primary"
+                  size="small"
                 >
                   Open GitHub issues
-                </a>
-              </div>
-            </div>
-          </div>
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </Container>
   );
 };
 

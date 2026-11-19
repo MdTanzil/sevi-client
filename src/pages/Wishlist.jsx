@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import useAxios from "../hooks/useAxios";
 import WishlistCard from "../components/WishlistCard";
 
@@ -17,7 +18,7 @@ const Wishlist = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={56} />
       </div>
     );
   }
@@ -25,13 +26,18 @@ const Wishlist = () => {
   if (isError) {
     return (
       <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Could not load your wishlist</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+        <Typography variant="h5" component="p" fontWeight="bold">
+          Could not load your wishlist
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          className="poppins mt-4"
           onClick={() => refetch()}
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -39,21 +45,30 @@ const Wishlist = () => {
   return (
     <div>
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">My</span> Wishlist
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          My
+        </Box>{" "}
+        Wishlist
       </h1>
       {data.length <= 0 && (
         <div className="my-48 text-center">
-          <p className="text-2xl font-bold">Your wishlist is empty</p>
-          <p className="mt-2 opacity-70">
+          <Typography variant="h5" component="p" fontWeight="bold">
+            Your wishlist is empty
+          </Typography>
+          <Typography className="mt-2 opacity-70">
             Save books you want to read later — when an out-of-stock book
             comes back, you will get a notification.
-          </p>
-          <Link
+          </Typography>
+          <Button
+            component={Link}
             to="/all-book"
-            className="btn btn-sm btn-primary poppins mt-4"
+            variant="contained"
+            color="primary"
+            size="small"
+            className="poppins mt-4"
           >
             Browse books
-          </Link>
+          </Button>
         </div>
       )}
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

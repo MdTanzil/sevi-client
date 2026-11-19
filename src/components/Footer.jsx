@@ -1,58 +1,113 @@
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 import logo from "../assets/logo.png";
 
 const Footer = () => {
   return (
-    <footer className="footer p-6 sm:p-10 bg-base-200 text-base-content mt-10">
-      <aside>
+    <Box
+      component="footer"
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 4,
+        p: { xs: 3, sm: 5 },
+        mt: 5,
+        bgcolor: "grey.200",
+        color: "text.primary",
+      }}
+    >
+      <Box component="aside" sx={{ minWidth: 200 }}>
         <img src={logo} alt="Sevi logo" />
-        <p className="font-bold text-lg">Sevi</p>
-        <p>
+        <Typography sx={{ fontWeight: 700, fontSize: "1.125rem" }}>
+          Sevi
+        </Typography>
+        <Typography>
           Your community library — browse, borrow,
           <br />
           and keep track of your reading.
-        </p>
-      </aside>
-      <nav>
-        <header className="footer-title">Library</header>
-        <Link className="link link-hover" to="/all-book">
+        </Typography>
+      </Box>
+      <Box
+        component="nav"
+        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            opacity: 0.6,
+          }}
+        >
+          Library
+        </Typography>
+        <Link component={RouterLink} to="/all-book" color="inherit" underline="hover">
           All Books
         </Link>
-        <Link className="link link-hover" to="/">
+        <Link component={RouterLink} to="/" color="inherit" underline="hover">
           Categories
         </Link>
-        <Link className="link link-hover" to="/borrowed-book">
+        <Link component={RouterLink} to="/borrowed-book" color="inherit" underline="hover">
           Borrowed Books
         </Link>
-        <Link className="link link-hover" to="/profile">
+        <Link component={RouterLink} to="/profile" color="inherit" underline="hover">
           My Profile
         </Link>
-      </nav>
-      <nav>
-        <header className="footer-title">Sevi</header>
-        <Link className="link link-hover" to="/about">
+      </Box>
+      <Box
+        component="nav"
+        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            opacity: 0.6,
+          }}
+        >
+          Sevi
+        </Typography>
+        <Link component={RouterLink} to="/about" color="inherit" underline="hover">
           About us
         </Link>
-        <Link className="link link-hover" to="/contact">
+        <Link component={RouterLink} to="/contact" color="inherit" underline="hover">
           Contact
         </Link>
-        <Link className="link link-hover" to="/faq">
+        <Link component={RouterLink} to="/faq" color="inherit" underline="hover">
           FAQ
         </Link>
-      </nav>
-      <nav>
-        <header className="footer-title">Legal</header>
-        <Link className="link link-hover" to="/terms">
+      </Box>
+      <Box
+        component="nav"
+        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            opacity: 0.6,
+          }}
+        >
+          Legal
+        </Typography>
+        <Link component={RouterLink} to="/terms" color="inherit" underline="hover">
           Terms of use
         </Link>
-        <Link className="link link-hover" to="/privacy">
+        <Link component={RouterLink} to="/privacy" color="inherit" underline="hover">
           Privacy policy
         </Link>
-        <Link className="link link-hover" to="/cookies">
+        <Link component={RouterLink} to="/cookies" color="inherit" underline="hover">
           Cookie policy
         </Link>
-      </nav>
-    </footer>
+      </Box>
+    </Box>
   );
 };
 export default Footer;

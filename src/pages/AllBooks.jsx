@@ -3,6 +3,11 @@ import useAxios from "../hooks/useAxios";
 import BookCard from "./BookCard";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useMemo, useState } from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { filterBooks } from "../utils/searchBooks";
 const AllBooks = () => {
   const axios = useAxios();
@@ -32,23 +37,27 @@ const AllBooks = () => {
   // loging data
   if (isLoading) {
     return (
-      <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
-      </div>
+      <Box className="flex justify-center my-48">
+        <CircularProgress size={56} />
+      </Box>
     );
   }
 
   if (isError) {
     return (
-      <div className="my-48 text-center">
-        <p className="text-2xl font-bold">Could not load the books</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+      <Box className="my-48 text-center">
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          Could not load the books
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
           onClick={() => refetch()}
         >
           Try again
-        </button>
-      </div>
+        </Button>
+      </Box>
     );
   }
 
@@ -71,59 +80,90 @@ const AllBooks = () => {
   return (
     <div>
       <div className="flex justify-center">
-        <h1 className="text-3xl sm:text-4xl text-center font-bold playfair mt-5 flex flex-wrap items-center justify-center">
-          <span className="text-secondary">All</span>{" "}
-          <span className="ml-2"> Books </span>
-          <span>
-            <button
-              className="btn btn-sm poppins btn-primary ml-2"
-              onClick={handleFilter}
-            >
-              {filterActive ? "Show All" : "Filter"}
-            </button>
-          </span>
-        </h1>
+        <Typography
+          component="h1"
+          className="playfair"
+          sx={{
+            fontSize: { xs: "1.875rem", sm: "2.25rem" },
+            fontWeight: 700,
+            textAlign: "center",
+            mt: 2.5,
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Box component="span" sx={{ color: "secondary.main" }}>
+            All
+          </Box>{" "}
+          <Box component="span" sx={{ ml: 1 }}>
+            Books
+          </Box>{" "}
+          <Button
+            variant="contained"
+            size="small"
+            sx={{ ml: 1 }}
+            onClick={handleFilter}
+          >
+            {filterActive ? "Show All" : "Filter"}
+          </Button>
+        </Typography>
       </div>
-      <div className="flex flex-wrap justify-center items-center mt-5 gap-2 px-2">
-        <input
+      <Box className="flex flex-wrap justify-center items-center mt-5 gap-2 px-2">
+        <TextField
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by title, author or category"
-          className="input input-bordered input-primary w-full max-w-md placeholder:text-primary"
+          fullWidth
+          sx={{
+            maxWidth: "28rem",
+            "& .MuiInputBase-input::placeholder": {
+              color: "primary.main",
+              opacity: 1,
+            },
+          }}
         />
         {searchTerm && (
-          <button
-            className="btn btn-sm btn-outline btn-primary poppins"
+          <Button
+            variant="outlined"
+            size="small"
             onClick={() => setSearchTerm("")}
           >
             Clear
-          </button>
+          </Button>
         )}
-      </div>
+      </Box>
       {isFiltering && data.length > 0 && (
-        <p className="text-center mt-3 poppins">
+        <Typography sx={{ textAlign: "center", mt: 1.5 }}>
           Showing {displayData.length} of {data.length} books
-        </p>
+        </Typography>
       )}
       {data.length <= 0 && (
-        <div className="my-48 text-center text-2xl font-bold">
-          Do not have any Books{" "}
-        </div>
+        <Box className="my-48 text-center">
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            Do not have any Books{" "}
+          </Typography>
+        </Box>
       )}
       {data.length > 0 && displayData.length <= 0 && (
-        <div className="my-48 text-center">
-          <p className="text-2xl font-bold">No books match your search</p>
-          <p className="mt-2 poppins">
+        <Box className="my-48 text-center">
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            No books match your search
+          </Typography>
+          <Typography sx={{ mt: 1 }}>
             Try a different title, author or category.
-          </p>
-          <button
-            className="btn btn-sm btn-primary poppins mt-4"
+          </Typography>
+          <Button
+            variant="contained"
+            size="small"
+            sx={{ mt: 2 }}
             onClick={handleClearSearch}
           >
             Clear Search
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {displayData?.map((d) => (

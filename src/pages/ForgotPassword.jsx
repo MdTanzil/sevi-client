@@ -1,8 +1,16 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import app from "../config/firrebase.config";
 import toast from "react-hot-toast";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
+import Link from "@mui/material/Link";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -32,69 +40,99 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content w-full px-4">
-        <div className="card w-full max-w-sm shadow-2xl bg-base-100">
-          <h1 className="text-3xl sm:text-4xl playfair font-bold text-center my-4">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "grey.100",
+        px: 2,
+        py: 4,
+      }}
+    >
+      <Card sx={{ width: "100%", maxWidth: 448 }} elevation={6}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            align="center"
+            fontWeight="bold"
+            className="playfair"
+            gutterBottom
+          >
             Forgot password?
-          </h1>
+          </Typography>
           {sent ? (
-            <div className="card-body text-center">
-              <p>
+            <Box sx={{ textAlign: "center", mt: 2 }}>
+              <Typography variant="body1">
                 We sent a password reset link to{" "}
-                <span className="font-medium break-all">{email}</span>.
-                Check your inbox (and spam folder) and follow the link to
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 500, wordBreak: "break-all" }}
+                >
+                  {email}
+                </Box>
+                . Check your inbox (and spam folder) and follow the link to
                 set a new password.
-              </p>
-              <Link to="/login" className="btn btn-primary mt-6">
+              </Typography>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                color="primary"
+                sx={{ mt: 3 }}
+              >
                 Back to login
-              </Link>
-            </div>
+              </Button>
+            </Box>
           ) : (
-            <form className="card-body" onSubmit={handleSubmit}>
-              <p className="text-sm opacity-70">
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
                 Enter the email address you signed up with and we will send
                 you a link to reset your password.
-              </p>
-              <div className="form-control mt-2">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email"
-                  className="input input-bordered focus:input-primary"
-                  required
-                />
-              </div>
-              <div className="form-control mt-6">
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Sending...
-                    </>
-                  ) : (
-                    "Send reset link"
-                  )}
-                </button>
-              </div>
-              <p className="text-center mt-4">
-                <Link to="/login" className="link link-primary">
+              </Typography>
+              <TextField
+                type="email"
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email"
+                required
+                fullWidth
+                margin="normal"
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={isSubmitting}
+                sx={{ mt: 3 }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <CircularProgress
+                      size={16}
+                      color="inherit"
+                      sx={{ mr: 1 }}
+                    />
+                    Sending...
+                  </>
+                ) : (
+                  "Send reset link"
+                )}
+              </Button>
+              <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+                <Link component={RouterLink} to="/login" underline="hover">
                   Back to login
                 </Link>
-              </p>
-            </form>
+              </Typography>
+            </Box>
           )}
-        </div>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

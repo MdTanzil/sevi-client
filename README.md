@@ -46,10 +46,19 @@ borrow books, and track borrowed books.
 
 ## Tech stack
 
-<img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" /><img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white" /><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" /><img src="https://img.shields.io/badge/daisyUI-1ad1a5?style=for-the-badge&logo=daisyui&logoColor=white" /><img src="https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black" /><img src="https://img.shields.io/badge/axios-671ddf?&style=for-the-badge&logo=axios&logoColor=white" /><img src="https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E" />
+<img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" /><img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white" /><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" /><img src="https://img.shields.io/badge/MUI-007FFF?style=for-the-badge&logo=mui&logoColor=white" /><img src="https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black" /><img src="https://img.shields.io/badge/axios-671ddf?&style=for-the-badge&logo=axios&logoColor=white" /><img src="https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E" />
 
-React 18, React Router 6, Vite 4, Tailwind CSS 3, daisyUI 3, TanStack Query 5,
-Axios, Firebase 10, react-hot-toast, SweetAlert2.
+React 18, React Router 6, Vite 4, Tailwind CSS 3 (layout utilities), Material
+UI 9 (components), TanStack Query 5, Axios, Firebase 10, react-hot-toast,
+SweetAlert2.
+
+## Design system
+
+All UI components are Material UI, themed in `src/theme.js` with the Sevi
+brand colors: primary purple `#723182`, secondary yellow `#fdc800`, Poppins
+body font (Playfair Display for the hero heading). The app is wrapped in
+MUI's `ThemeProvider` + `CssBaseline` in `src/main.jsx`. Tailwind is kept
+only for layout utilities (spacing, flex/grid, responsive classes).
 
 ## Getting started
 

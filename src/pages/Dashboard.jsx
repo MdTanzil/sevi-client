@@ -2,6 +2,24 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import useAxios from "../hooks/useAxios";
 import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
@@ -15,12 +33,12 @@ import { getDueStatus } from "../utils/borrowDates";
 const DueBadge = ({ record }) => {
   const status = getDueStatus(record);
   if (status === "overdue") {
-    return <span className="badge badge-error text-white">Overdue</span>;
+    return <Chip label="Overdue" color="error" size="small" />;
   }
   if (status === "due-soon") {
-    return <span className="badge badge-warning">Due soon</span>;
+    return <Chip label="Due soon" color="warning" size="small" />;
   }
-  return <span className="badge badge-info">Borrowed</span>;
+  return <Chip label="Borrowed" color="info" size="small" />;
 };
 
 DueBadge.propTypes = {
@@ -60,24 +78,28 @@ const StockCell = ({ book, onSaved }) => {
 
   return (
     <div className="flex items-center gap-2">
-      <input
+      <TextField
         type="number"
-        min="0"
-        step="1"
+        size="small"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="input input-bordered input-sm w-20"
-        aria-label={`Stock for ${book.name}`}
+        inputProps={{
+          min: 0,
+          step: 1,
+          "aria-label": `Stock for ${book.name}`,
+        }}
+        sx={{ width: 80 }}
       />
-      <button
-        className="btn btn-sm btn-primary"
+      <Button
+        variant="contained"
+        size="small"
         onClick={handleSave}
         disabled={!changed || isSaving}
       >
         {isSaving ? "Saving..." : "Save"}
-      </button>
+      </Button>
       {currentQty === 0 && (
-        <span className="badge badge-error text-white">Out of stock</span>
+        <Chip label="Out of stock" color="error" size="small" />
       )}
     </div>
   );
@@ -123,31 +145,35 @@ const CategoryImageEditor = ({ category, onSaved }) => {
   };
 
   return (
-    <div className="card bg-base-100 shadow">
-      <div className="card-body p-4">
+    <Card>
+      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <p className="font-bold">{category.name}</p>
         <SafeImage
           src={previewSrc}
           alt={`${category.name} category image`}
-          className="h-32 w-full object-contain bg-base-200 rounded-lg"
+          className="h-32 w-full object-contain bg-gray-100 rounded-lg"
         />
-        <input
+        <TextField
           type="url"
+          size="small"
+          fullWidth
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="https://..."
-          className="input input-bordered input-sm w-full mt-3"
-          aria-label={`Image URL for ${category.name}`}
+          inputProps={{ "aria-label": `Image URL for ${category.name}` }}
+          sx={{ mt: 1.5 }}
         />
-        <button
-          className="btn btn-sm btn-primary mt-2"
+        <Button
+          variant="contained"
+          size="small"
           onClick={handleSave}
           disabled={!changed || isSaving}
+          sx={{ mt: 1 }}
         >
           {isSaving ? "Saving..." : "Save image"}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -272,7 +298,7 @@ const Dashboard = () => {
   if (profileLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={48} />
       </div>
     );
   }
@@ -285,9 +311,15 @@ const Dashboard = () => {
         <p className="mt-2">
           Only librarians and admins can access the dashboard.
         </p>
-        <Link to="/all-book" className="btn btn-sm btn-primary poppins mt-4">
+        <Button
+          component={Link}
+          to="/all-book"
+          variant="contained"
+          size="small"
+          sx={{ mt: 2 }}
+        >
           Browse books
-        </Link>
+        </Button>
       </div>
     );
   }
@@ -295,7 +327,7 @@ const Dashboard = () => {
   if (statsLoading || booksLoading || borrowsLoading || categoriesLoading) {
     return (
       <div className="flex justify-center my-48">
-        <span className="loading loading-bars loading-lg"></span>
+        <CircularProgress size={48} />
       </div>
     );
   }
@@ -304,12 +336,14 @@ const Dashboard = () => {
     return (
       <div className="my-48 text-center">
         <p className="text-2xl font-bold">Could not load the dashboard</p>
-        <button
-          className="btn btn-sm btn-primary poppins mt-4"
+        <Button
+          variant="contained"
+          size="small"
           onClick={handleRetry}
+          sx={{ mt: 2 }}
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -321,80 +355,103 @@ const Dashboard = () => {
     {
       label: "Overdue",
       value: stats?.overdueBorrows ?? 0,
-      valueClass: stats?.overdueBorrows > 0 ? "text-error" : "",
+      valueColor: stats?.overdueBorrows > 0 ? "error.main" : undefined,
     },
     { label: "Total users", value: stats?.totalUsers ?? 0 },
     {
       label: "Out of stock",
       value: stats?.outOfStockBooks ?? 0,
-      valueClass: stats?.outOfStockBooks > 0 ? "text-warning" : "",
+      valueColor: stats?.outOfStockBooks > 0 ? "warning.main" : undefined,
     },
   ];
 
   return (
     <div className="mt-5">
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
-        <span className="text-secondary">Library</span> Dashboard
+        <Box component="span" sx={{ color: "secondary.main" }}>
+          Library
+        </Box>{" "}
+        Dashboard
       </h1>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mt-6">
         {statCards.map((card) => (
-          <div key={card.label} className="card bg-base-100 shadow">
-            <div className="card-body p-4">
-              <p className="text-sm opacity-70">{card.label}</p>
-              <p
-                className={`text-3xl font-bold ${card.valueClass || ""}`}
+          <Card key={card.label}>
+            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+              <Typography variant="body2" color="text.secondary">
+                {card.label}
+              </Typography>
+              <Typography
+                variant="h4"
+                component="p"
+                sx={{
+                  fontSize: "1.875rem",
+                  fontWeight: 700,
+                  color: card.valueColor || "text.primary",
+                }}
               >
                 {card.value}
-              </p>
-            </div>
-          </div>
+              </Typography>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       {/* Admin shortcut: user management lives on its own page. */}
       {isAdmin && (
-        <div className="card bg-base-100 shadow mt-4">
-          <div className="card-body p-4 flex-row flex-wrap items-center justify-between gap-3">
+        <Card sx={{ mt: 2 }}>
+          <CardContent
+            sx={{ p: 2, "&:last-child": { pb: 2 } }}
+            className="flex flex-row flex-wrap items-center justify-between gap-3"
+          >
             <div>
               <p className="font-bold">User management</p>
               <p className="text-sm opacity-70">
                 Manage users and their roles (member, librarian, admin).
               </p>
             </div>
-            <Link
+            <Button
+              component={Link}
               to="/admin/users"
-              className="btn btn-sm btn-primary poppins"
+              variant="contained"
+              size="small"
             >
               Manage Users
-            </Link>
-          </div>
-        </div>
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Books: searchable list with inline stock editing. */}
       <div className="flex flex-wrap items-center justify-between gap-3 mt-10">
         <h2 className="text-2xl font-bold playfair">Books</h2>
-        <Link to="/add-book" className="btn btn-sm btn-primary poppins">
+        <Button
+          component={Link}
+          to="/add-book"
+          variant="contained"
+          size="small"
+        >
           Add Book
-        </Link>
+        </Button>
       </div>
       <div className="flex flex-wrap items-center gap-2 mt-4">
-        <input
+        <TextField
           type="text"
+          size="small"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by title, author or category"
-          className="input input-bordered input-primary w-full max-w-md placeholder:text-primary"
+          sx={{ width: "100%", maxWidth: "28rem" }}
         />
         {searchTerm && (
-          <button
-            className="btn btn-sm btn-outline btn-primary poppins"
+          <Button
+            variant="outlined"
+            size="small"
             onClick={() => setSearchTerm("")}
           >
             Clear
-          </button>
+          </Button>
         )}
       </div>
       {searchTerm.trim() !== "" && books.length > 0 && (
@@ -402,8 +459,13 @@ const Dashboard = () => {
           Showing {displayBooks.length} of {books.length} books
         </p>
       )}
-      <div className="card bg-base-100 shadow-xl mt-4 mb-6">
-        <div className="card-body p-4 sm:p-8">
+      <Card elevation={4} className="mt-4 mb-6">
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 4 },
+            "&:last-child": { pb: { xs: 2, sm: 4 } },
+          }}
+        >
           {books.length === 0 ? (
             <p className="text-center my-8 opacity-70">No books yet.</p>
           ) : displayBooks.length === 0 ? (
@@ -412,12 +474,14 @@ const Dashboard = () => {
               <p className="mt-2 poppins">
                 Try a different title, author or category.
               </p>
-              <button
-                className="btn btn-sm btn-primary poppins mt-4"
+              <Button
+                variant="contained"
+                size="small"
                 onClick={() => setSearchTerm("")}
+                sx={{ mt: 2 }}
               >
                 Clear Search
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -426,7 +490,7 @@ const Dashboard = () => {
                 {displayBooks.map((book) => (
                   <div
                     key={book._id}
-                    className="rounded-lg border border-base-300 p-3"
+                    className="rounded-lg border border-gray-300 p-3"
                   >
                     <p className="font-medium">{book.name}</p>
                     <p className="text-sm opacity-70">
@@ -436,75 +500,95 @@ const Dashboard = () => {
                       <StockCell book={book} onSaved={handleStockSaved} />
                     </div>
                     <div className="flex flex-wrap gap-2 mt-3">
-                      <Link
+                      <Button
+                        component={Link}
                         to={`/books-update/${book._id}`}
-                        className="btn btn-sm btn-outline btn-primary poppins"
+                        variant="outlined"
+                        size="small"
+                        startIcon={<EditIcon />}
                       >
                         Edit
-                      </Link>
-                      <button
-                        className="btn btn-sm btn-outline btn-error poppins"
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        startIcon={<DeleteIcon />}
                         onClick={() => handleDeleteBook(book)}
                         disabled={deletingId === book._id}
                       >
                         {deletingId === book._id ? "Deleting..." : "Delete"}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
               {/* Desktop: the full table. */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th>Author</th>
-                      <th>Category</th>
-                      <th>Stock</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <TableContainer className="hidden md:block">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Title</TableCell>
+                      <TableCell>Author</TableCell>
+                      <TableCell>Category</TableCell>
+                      <TableCell>Stock</TableCell>
+                      <TableCell>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody
+                    sx={{
+                      "& .MuiTableRow-root:nth-of-type(odd)": {
+                        backgroundColor: "action.hover",
+                      },
+                    }}
+                  >
                     {displayBooks.map((book) => (
-                      <tr key={book._id}>
-                        <td className="font-medium">{book.name}</td>
-                        <td>{book.author}</td>
-                        <td>{book.category}</td>
-                        <td>
+                      <TableRow key={book._id}>
+                        <TableCell sx={{ fontWeight: 500 }}>
+                          {book.name}
+                        </TableCell>
+                        <TableCell>{book.author}</TableCell>
+                        <TableCell>{book.category}</TableCell>
+                        <TableCell>
                           <StockCell
                             book={book}
                             onSaved={handleStockSaved}
                           />
-                        </td>
-                        <td>
+                        </TableCell>
+                        <TableCell>
                           <div className="flex flex-wrap gap-2">
-                            <Link
+                            <Button
+                              component={Link}
                               to={`/books-update/${book._id}`}
-                              className="btn btn-sm btn-outline btn-primary poppins"
+                              variant="outlined"
+                              size="small"
+                              startIcon={<EditIcon />}
                             >
                               Edit
-                            </Link>
-                            <button
-                              className="btn btn-sm btn-outline btn-error poppins"
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              startIcon={<DeleteIcon />}
                               onClick={() => handleDeleteBook(book)}
                               disabled={deletingId === book._id}
                             >
                               {deletingId === book._id
                                 ? "Deleting..."
                                 : "Delete"}
-                            </button>
+                            </Button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Categories: edit each category's card image. */}
       <h2 className="text-2xl font-bold playfair mt-10">Categories</h2>
@@ -533,8 +617,13 @@ const Dashboard = () => {
           ({borrows.length})
         </span>
       </h2>
-      <div className="card bg-base-100 shadow-xl mt-4 mb-6">
-        <div className="card-body p-4 sm:p-8">
+      <Card elevation={4} className="mt-4 mb-6">
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 4 },
+            "&:last-child": { pb: { xs: 2, sm: 4 } },
+          }}
+        >
           {borrows.length === 0 ? (
             <p className="text-center my-8 opacity-70">
               No books are currently borrowed.
@@ -547,10 +636,10 @@ const Dashboard = () => {
                   const status = getDueStatus(record);
                   const border =
                     status === "overdue"
-                      ? "border-error"
+                      ? "border-red-500"
                       : status === "due-soon"
-                      ? "border-warning"
-                      : "border-base-300";
+                      ? "border-amber-500"
+                      : "border-gray-300";
                   return (
                     <div
                       key={record._id}
@@ -576,52 +665,54 @@ const Dashboard = () => {
               </div>
               {/* Desktop: the full table. Overdue rows are red,
                   due-soon rows are amber. */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>Book</th>
-                      <th>Borrower</th>
-                      <th>Borrowed</th>
-                      <th>Due</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <TableContainer className="hidden md:block">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Book</TableCell>
+                      <TableCell>Borrower</TableCell>
+                      <TableCell>Borrowed</TableCell>
+                      <TableCell>Due</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
                     {borrows.map((record) => {
                       const status = getDueStatus(record);
                       const rowClass =
                         status === "overdue"
-                          ? "bg-error/10"
+                          ? "bg-red-50"
                           : status === "due-soon"
-                          ? "bg-warning/10"
+                          ? "bg-amber-50"
                           : "";
                       return (
-                        <tr key={record._id} className={rowClass}>
-                          <td>
+                        <TableRow key={record._id} className={rowClass}>
+                          <TableCell>
                             <div className="font-medium">
                               {record.bookName}
                             </div>
                             <div className="text-sm opacity-70">
                               by {record.author}
                             </div>
-                          </td>
-                          <td className="break-all">{record.email}</td>
-                          <td>{record.borrowedDate || "—"}</td>
-                          <td>{record.retunDate || "—"}</td>
-                          <td>
+                          </TableCell>
+                          <TableCell className="break-all">
+                            {record.email}
+                          </TableCell>
+                          <TableCell>{record.borrowedDate || "—"}</TableCell>
+                          <TableCell>{record.retunDate || "—"}</TableCell>
+                          <TableCell>
                             <DueBadge record={record} />
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

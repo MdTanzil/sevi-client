@@ -1,22 +1,35 @@
 /* eslint-disable react/no-unescaped-entities */
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import SafeImage from "../components/SafeImage";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
 const Error = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center">
       <div className="container flex flex-col md:flex-row items-center justify-between px-5 text-gray-700">
         <div className="w-full lg:w-1/2 mx-2 sm:mx-8">
-          <div className="text-6xl sm:text-7xl text-primary font-extrabold mb-8">
+          <Typography
+            variant="h1"
+            component="div"
+            color="primary"
+            fontWeight={800}
+            sx={{ fontSize: { xs: "3.75rem", sm: "4.5rem" }, mb: 4 }}
+          >
             {" "}
             404
-          </div>
-          <p className="text-2xl md:text-3xl font-light leading-normal mb-8">
+          </Typography>
+          <Typography
+            variant="h5"
+            component="p"
+            fontWeight={300}
+            sx={{ fontSize: { xs: "1.5rem", md: "1.875rem" }, lineHeight: 1.4, mb: 4 }}
+          >
             Sorry we couldn't find the page you're looking for
-          </p>
-          <Link className="btn btn-primary" to={"/"}>
+          </Typography>
+          <Button component={RouterLink} to={"/"} variant="contained" color="primary">
             back to homepage
-          </Link>
+          </Button>
         </div>
         <div className="w-full lg:flex lg:justify-end lg:w-1/2 mx-2 sm:mx-5 my-8 sm:my-12">
           <SafeImage
