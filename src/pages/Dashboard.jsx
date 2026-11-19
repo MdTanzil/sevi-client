@@ -46,141 +46,21 @@ DueBadge.propTypes = {
   record: PropTypes.object,
 };
 
-// Inline stock editor for one book: a number input + Save button that
-// updates the quantity through PUT /books/:id (librarian/admin only).
-const StockCell = ({ book, onSaved }) => {
-  const axios = useAxios();
-  const currentQty = Number(book.quantity) || 0;
-  const [value, setValue] = useState(String(currentQty));
-  const [isSaving, setIsSaving] = useState(false);
-
-  const parsed = Number(value);
-  const isValid =
-    value.trim() !== "" && Number.isInteger(parsed) && parsed >= 0;
-  const changed = isValid && parsed !== currentQty;
-
-  const handleSave = async () => {
-    if (!changed || isSaving) return;
-    setIsSaving(true);
-    try {
-      await axios.put(`/books/${book._id}`, { quantity: parsed });
-      toast.success(`Stock updated to ${parsed}`);
-      setValue(String(parsed));
-      onSaved();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.error ||
-          "Could not update the stock. Please try again."
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
+// Read-only stock display for one book: the quantity plus an
+// "Out of stock" chip at zero. Stock is changed from the Edit link
+// (Update Book page), not inline.
+const StockDisplay = ({ book }) => {
+  const qty = Number(book.quantity) || 0;
   return (
     <div className="flex items-center gap-2">
-      <TextField
-        type="number"
-        size="small"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        inputProps={{
-          min: 0,
-          step: 1,
-          "aria-label": `Stock for ${book.name}`,
-        }}
-        sx={{ width: 80 }}
-      />
-      <Button
-        variant="contained"
-        size="small"
-        onClick={handleSave}
-        disabled={!changed || isSaving}
-      >
-        {isSaving ? "Saving..." : "Save"}
-      </Button>
-      {currentQty === 0 && (
-        <Chip label="Out of stock" color="error" size="small" />
-      )}
+      <span>{qty}</span>
+      {qty === 0 && <Chip label="Out of stock" color="error" size="small" />}
     </div>
   );
 };
 
-StockCell.propTypes = {
+StockDisplay.propTypes = {
   book: PropTypes.object.isRequired,
-  onSaved: PropTypes.func.isRequired,
-};
-
-// Category image editor: the current thumbnail, an image-URL input with
-// a live preview, and a Save button (PATCH /admin/categories/:id).
-// Category names are not editable — book records reference them.
-const CategoryImageEditor = ({ category, onSaved }) => {
-  const axios = useAxios();
-  const [value, setValue] = useState(category.image || "");
-  const [isSaving, setIsSaving] = useState(false);
-
-  const trimmed = value.trim();
-  const isValid = trimmed.startsWith("https://");
-  const changed = isValid && trimmed !== (category.image || "");
-  // Live preview: the typed URL when it looks usable, else the current image.
-  const previewSrc = isValid ? trimmed : category.image;
-
-  const handleSave = async () => {
-    if (!changed || isSaving) return;
-    setIsSaving(true);
-    try {
-      await axios.patch(`/admin/categories/${category._id}`, {
-        image: trimmed,
-      });
-      toast.success(`${category.name} image updated`);
-      setValue(trimmed);
-      onSaved();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.error ||
-          "Could not update the image. Please try again."
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <Card>
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-        <p className="font-bold">{category.name}</p>
-        <SafeImage
-          src={previewSrc}
-          alt={`${category.name} category image`}
-          className="h-32 w-full object-contain bg-gray-100 rounded-lg"
-        />
-        <TextField
-          type="url"
-          size="small"
-          fullWidth
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="https://..."
-          inputProps={{ "aria-label": `Image URL for ${category.name}` }}
-          sx={{ mt: 1.5 }}
-        />
-        <Button
-          variant="contained"
-          size="small"
-          onClick={handleSave}
-          disabled={!changed || isSaving}
-          sx={{ mt: 1 }}
-        >
-          {isSaving ? "Saving..." : "Save image"}
-        </Button>
-      </CardContent>
-    </Card>
-  );
-};
-
-CategoryImageEditor.propTypes = {
-  category: PropTypes.object.isRequired,
-  onSaved: PropTypes.func.isRequired,
 };
 
 const VALID_SECTIONS = ["overview", "books", "borrows", "categories"];
@@ -274,11 +154,16 @@ const Dashboard = () => {
     [books, searchTerm]
   );
 
-  // A stock change also moves the totals, so refresh both.
-  const handleStockSaved = () => {
-    refetchBooks();
-    refetchStats();
-  };
+  // Books per category, for the Categories table (counted client-side
+  // from the already-fetched book list).
+  const booksPerCategory = useMemo(() => {
+    const counts = {};
+    books.forEach((book) => {
+      if (!book.category) return;
+      counts[book.category] = (counts[book.category] || 0) + 1;
+    });
+    return counts;
+  }, [books]);
 
   // Delete a book from the dashboard (librarian/admin only). Confirms
   // first — the delete is permanent. The server refuses the delete with
@@ -425,7 +310,8 @@ const Dashboard = () => {
         </>
       )}
 
-      {/* Books: searchable list with inline stock editing. */}
+      {/* Books: searchable list. Stock is read-only here — use Edit
+          to change it. */}
       {section === "books" && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
@@ -500,8 +386,9 @@ const Dashboard = () => {
                     <p className="text-sm opacity-70">
                       by {book.author} · {book.category}
                     </p>
-                    <div className="mt-3">
-                      <StockCell book={book} onSaved={handleStockSaved} />
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-sm opacity-70">Stock:</span>
+                      <StockDisplay book={book} />
                     </div>
                     <div className="flex flex-wrap gap-2 mt-3">
                       <Button
@@ -554,10 +441,7 @@ const Dashboard = () => {
                         <TableCell>{book.author}</TableCell>
                         <TableCell>{book.category}</TableCell>
                         <TableCell>
-                          <StockCell
-                            book={book}
-                            onSaved={handleStockSaved}
-                          />
+                          <StockDisplay book={book} />
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-2">
@@ -596,27 +480,61 @@ const Dashboard = () => {
         </>
       )}
 
-      {/* Categories: edit each category's card image. */}
+      {/* Categories: thumbnail, name, and book count in a table. */}
       {section === "categories" && (
         <>
           <h2 className="text-2xl font-bold playfair mt-6">Categories</h2>
-      <p className="text-sm opacity-70 mt-1">
-        Update a category&apos;s card image. Names cannot be changed — book
-        records reference them.
-      </p>
-      {categories.length === 0 ? (
-        <p className="text-center my-8 opacity-70">No categories yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 mb-6">
-          {categories.map((category) => (
-            <CategoryImageEditor
-              key={category._id}
-              category={category}
-              onSaved={refetchCategories}
-            />
-          ))}
-        </div>
-      )}
+          <Card elevation={4} className="mt-4 mb-6">
+            <CardContent
+              sx={{
+                p: { xs: 2, sm: 4 },
+                "&:last-child": { pb: { xs: 2, sm: 4 } },
+              }}
+            >
+              {categories.length === 0 ? (
+                <p className="text-center my-8 opacity-70">
+                  No categories yet.
+                </p>
+              ) : (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Image</TableCell>
+                        <TableCell>Category</TableCell>
+                        <TableCell>Books</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody
+                      sx={{
+                        "& .MuiTableRow-root:nth-of-type(odd)": {
+                          backgroundColor: "action.hover",
+                        },
+                      }}
+                    >
+                      {categories.map((category) => (
+                        <TableRow key={category._id}>
+                          <TableCell>
+                            <SafeImage
+                              src={category.image}
+                              alt={`${category.name} category image`}
+                              className="h-12 w-16 object-cover rounded"
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 500 }}>
+                            {category.name}
+                          </TableCell>
+                          <TableCell>
+                            {booksPerCategory[category.name] || 0}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
 
