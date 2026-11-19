@@ -19,6 +19,7 @@ import {
 import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
+import DashboardLayout from "../components/DashboardLayout";
 import toast from "react-hot-toast";
 
 const ROLES = ["member", "librarian", "admin"];
@@ -117,7 +118,7 @@ const UsersAdmin = () => {
   }
 
   return (
-    <div className="mt-5">
+    <DashboardLayout active="users">
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
         <Box component="span" sx={{ color: "secondary.main" }}>
           Manage
@@ -262,7 +263,7 @@ const UsersAdmin = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+    </DashboardLayout>
   );
 };
 

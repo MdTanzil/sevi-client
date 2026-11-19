@@ -1,27 +1,22 @@
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import { PropTypes } from "prop-types";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import SafeImage from "../components/SafeImage";
-import useProfile from "../hooks/useProfile";
 
 const BookCard = ({ book }) => {
   const { _id, name, author, quantity, imageUrl, category, rating } = book;
-  const { canManageBooks } = useProfile();
   const navigate = useNavigate();
   const outOfStock = (quantity ?? 0) < 1;
 
   const openDetails = () => navigate(`/books-details/${_id}`);
 
-  // Keyboard support for the clickable card. Ignore key presses that
-  // come from the Update button inside the card (it handles Enter itself).
+  // Keyboard support for the clickable card.
   const handleKeyDown = (e) => {
     if (e.target !== e.currentTarget) return;
     if (e.key === "Enter" || e.key === " ") {
@@ -107,20 +102,6 @@ const BookCard = ({ book }) => {
           </Typography>
         </Box>
       </CardContent>
-      {canManageBooks && (
-        <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2, pt: 0 }}>
-          <Button
-            component={Link}
-            to={`/books-update/${_id}`}
-            onClick={(e) => e.stopPropagation()}
-            variant="outlined"
-            color="primary"
-            size="small"
-          >
-            Update
-          </Button>
-        </CardActions>
-      )}
     </Card>
   );
 };

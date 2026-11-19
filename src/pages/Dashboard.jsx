@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import {
@@ -25,6 +25,7 @@ import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import SafeImage from "../components/SafeImage";
+import DashboardLayout from "../components/DashboardLayout";
 import { filterBooks } from "../utils/searchBooks";
 import { getDueStatus } from "../utils/borrowDates";
 
@@ -182,12 +183,33 @@ CategoryImageEditor.propTypes = {
   onSaved: PropTypes.func.isRequired,
 };
 
+const VALID_SECTIONS = ["overview", "books", "borrows", "categories"];
+
 const Dashboard = () => {
   const axios = useAxios();
-  const { canManageBooks, isAdmin, isLoading: profileLoading } = useProfile();
+  const { canManageBooks, isLoading: profileLoading } = useProfile();
   const [searchTerm, setSearchTerm] = useState("");
   // The book currently being deleted (its Delete button is disabled).
   const [deletingId, setDeletingId] = useState(null);
+
+  // Visible dashboard section, from the ?section= query param so the URL
+  // stays shareable and refresh-safe (unknown values fall back to
+  // overview). Kept in state so switching sections does not remount the
+  // page or refetch the data; the param update keeps the URL in sync.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramSection = searchParams.get("section");
+  const [section, setSection] = useState(
+    VALID_SECTIONS.includes(paramSection) ? paramSection : "overview"
+  );
+  useEffect(() => {
+    setSection(
+      VALID_SECTIONS.includes(paramSection) ? paramSection : "overview"
+    );
+  }, [paramSection]);
+  const changeSection = (next) => {
+    setSection(next);
+    setSearchParams({ section: next });
+  };
 
   const {
     data: stats,
@@ -366,7 +388,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="mt-5">
+    <DashboardLayout active={section} onSectionChange={changeSection}>
       <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
         <Box component="span" sx={{ color: "secondary.main" }}>
           Library
@@ -374,58 +396,40 @@ const Dashboard = () => {
         Dashboard
       </h1>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mt-6">
-        {statCards.map((card) => (
-          <Card key={card.label}>
-            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-              <Typography variant="body2" color="text.secondary">
-                {card.label}
-              </Typography>
-              <Typography
-                variant="h4"
-                component="p"
-                sx={{
-                  fontSize: "1.875rem",
-                  fontWeight: 700,
-                  color: card.valueColor || "text.primary",
-                }}
-              >
-                {card.value}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Admin shortcut: user management lives on its own page. */}
-      {isAdmin && (
-        <Card sx={{ mt: 2 }}>
-          <CardContent
-            sx={{ p: 2, "&:last-child": { pb: 2 } }}
-            className="flex flex-row flex-wrap items-center justify-between gap-3"
-          >
-            <div>
-              <p className="font-bold">User management</p>
-              <p className="text-sm opacity-70">
-                Manage users and their roles (member, librarian, admin).
-              </p>
-            </div>
-            <Button
-              component={Link}
-              to="/admin/users"
-              variant="contained"
-              size="small"
-            >
-              Manage Users
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Overview: the stat cards. */}
+      {section === "overview" && (
+        <>
+          <h2 className="text-2xl font-bold playfair mt-6">Overview</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mt-4">
+            {statCards.map((card) => (
+              <Card key={card.label}>
+                <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {card.label}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    component="p"
+                    sx={{
+                      fontSize: "1.875rem",
+                      fontWeight: 700,
+                      color: card.valueColor || "text.primary",
+                    }}
+                  >
+                    {card.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Books: searchable list with inline stock editing. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mt-10">
-        <h2 className="text-2xl font-bold playfair">Books</h2>
+      {section === "books" && (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
+            <h2 className="text-2xl font-bold playfair">Books</h2>
         <Button
           component={Link}
           to="/add-book"
@@ -589,9 +593,13 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
+        </>
+      )}
 
       {/* Categories: edit each category's card image. */}
-      <h2 className="text-2xl font-bold playfair mt-10">Categories</h2>
+      {section === "categories" && (
+        <>
+          <h2 className="text-2xl font-bold playfair mt-6">Categories</h2>
       <p className="text-sm opacity-70 mt-1">
         Update a category&apos;s card image. Names cannot be changed — book
         records reference them.
@@ -609,9 +617,13 @@ const Dashboard = () => {
           ))}
         </div>
       )}
+        </>
+      )}
 
       {/* Active borrows across all users. */}
-      <h2 className="text-2xl font-bold playfair mt-10">
+      {section === "borrows" && (
+        <>
+          <h2 className="text-2xl font-bold playfair mt-6">
         Active Borrows
         <span className="text-base font-normal opacity-70 ml-2">
           ({borrows.length})
@@ -713,7 +725,9 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+        </>
+      )}
+    </DashboardLayout>
   );
 };
 

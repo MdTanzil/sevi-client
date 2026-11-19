@@ -33,12 +33,17 @@ borrow books, and track borrowed books.
   membership card, editable name/phone/address, password and email change,
   and an admin page to manage users and their roles
 - Admin/librarian dashboard (`/dashboard`, linked from the navbar instead
-  of Add Book): library stats (books, copies, active/overdue borrows,
-  users, out-of-stock books), a searchable book list with inline stock
-  editing, links to edit/add books, and delete (with confirmation —
-  blocked while a book is borrowed), category image editing (thumbnail,
-  URL input with live preview), all active borrows across users
-  with overdue highlighting, and a shortcut to user management (admins)
+  of Add Book): a left sidebar navigates between Overview (library stats:
+  books, copies, active/overdue borrows, users, out-of-stock books),
+  Books (a searchable book list with inline stock editing, links to
+  edit/add books, and delete with confirmation — blocked while a book is
+  borrowed), Borrowed Books (all active borrows across users with overdue
+  highlighting), Categories (category image editing: thumbnail, URL input
+  with live preview), and Users (admin only — manage users and their
+  roles). The active section is kept in the URL (`?section=...`) so it
+  survives refresh and can be shared. Book cards no longer carry an
+  Update button — editing happens from the dashboard or the book
+  details page
 - Reading page for borrowed books
 - Authentication with Firebase (email/password and Google sign-in); library
   pages are protected routes. Login obtains a JWT cookie from the API, and
