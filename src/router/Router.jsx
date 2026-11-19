@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import AddBook from "../pages/AddBook";
 import AllBooks from "../pages/AllBooks";
 import BorrowedBooks from "../pages/BorrowedBooks";
+import Wishlist from "../pages/Wishlist";
 import PrivateRoute from "./PrivateRoute";
 import BooksAllCategory from "../pages/BooksAllCategory";
 import SingleBook from "../pages/SingleBook";
@@ -53,6 +54,14 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <BorrowedBooks></BorrowedBooks>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "wishlist",
+        element: (
+          <PrivateRoute>
+            <Wishlist></Wishlist>
           </PrivateRoute>
         ),
       },

@@ -4,6 +4,7 @@ import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
+import NotificationBell from "./NotificationBell";
 
 const NavBar = () => {
   const { user, logout, setUser, loading } = useAuth();
@@ -17,6 +18,7 @@ const NavBar = () => {
     { to: "/dashboard", label: "Dashboard", show: canManageBooks },
     { to: "/all-book", label: "All Book", show: true },
     { to: "/borrowed-book", label: "Borrowed Book", show: true },
+    { to: "/wishlist", label: "Wishlist", show: true },
     { to: "/admin/users", label: "Users", show: isAdmin },
     { to: "/about", label: "About", show: true },
     { to: "/faq", label: "FAQ", show: true },
@@ -80,6 +82,7 @@ const NavBar = () => {
             Hello ! {user.displayName}
           </p>
         )}
+        {user && <NotificationBell />}
         {user && (
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="cursor-pointer">

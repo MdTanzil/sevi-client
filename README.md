@@ -18,6 +18,11 @@ borrow books, and track borrowed books.
   only
 - Borrow books with a return date, view borrowed books, and return them
   (max 3 books at a time); borrow history is kept on the profile page
+- Wishlist: save books to a personal wishlist from the book details page
+  (including out-of-stock books, whose Borrow button is disabled) and view
+  them on the Wishlist page; when a wishlisted book is restocked, an
+  in-app notification appears on the bell icon in the navbar (unread count,
+  mark one/all read, click to open the book)
 - Books can be borrowed for up to 5 days; the profile history and the
   borrowed-books page warn about due-soon (amber) and overdue (red) books
 - Fully responsive design for phones, tablets, and desktops; book cards
@@ -72,14 +77,14 @@ Firebase configuration is hardcoded in `src/config/firrebase.config.js`.
 
 ```
 src/
-├── components/   # Reusable UI: BookForm, SafeImage, Categories, Hero, NavBar, ...
-├── pages/        # Route pages: Home, AllBooks, SingleBook, AddBook, UpdateBook, Profile, UsersAdmin, Dashboard, ...
+├── components/   # Reusable UI: BookForm, SafeImage, Categories, Hero, NavBar, NotificationBell, WishlistCard, ...
+├── pages/        # Route pages: Home, AllBooks, SingleBook, AddBook, UpdateBook, Profile, UsersAdmin, Dashboard, Wishlist, ...
 ├── hooks/        # useAuth, useAxios (API client), useProfile (server profile + role helpers)
 ├── provider/     # AuthProvider (Firebase auth context)
 ├── router/       # Router.jsx, PrivateRoute.jsx
 ├── layouts/      # MainLayout
 ├── config/       # Firebase config
-└── utils/        # searchBooks.js (book search filter)
+└── utils/        # searchBooks.js (book search filter), borrowDates.js (due-date helpers)
 ```
 
 ## Deployment

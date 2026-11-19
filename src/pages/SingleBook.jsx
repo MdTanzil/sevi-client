@@ -1,8 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
 import {  useNavigate, useParams } from "react-router-dom";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
@@ -24,7 +26,8 @@ const SingleBook = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate()
-  
+  const queryClient = useQueryClient();
+  const [isWishlistBusy, setIsWishlistBusy] = useState(false);
   const books = async () => {
     const res = await axios.get(`/single-book/${id}`);
     return res.data;
@@ -50,6 +53,40 @@ const SingleBook = () => {
   });
   const atBorrowLimit = myBorrows.length >= MAX_ACTIVE_BORROWS;
 
+  // The caller's wishlist (same cache as the Wishlist page) — the
+  // heart button below toggles this book on and off it.
+  const { data: wishlist = [] } = useQuery({
+    queryKey: ["wishlist"],
+    queryFn: async () => {
+      const res = await axios.get("/wishlist");
+      return res.data;
+    },
+  });
+  const isWishlisted = wishlist.some(
+    (entry) => String(entry.bookId) === String(id)
+  );
+
+  const handleWishlistToggle = async () => {
+    if (isWishlistBusy) return;
+    setIsWishlistBusy(true);
+    try {
+      if (isWishlisted) {
+        await axios.delete(`/wishlist/${id}`);
+        toast.success("Removed from your wishlist");
+      } else {
+        await axios.post("/wishlist", { bookId: id });
+        toast.success("Added to your wishlist");
+      }
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not update your wishlist. Please try again."
+      );
+    } finally {
+      setIsWishlistBusy(false);
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex justify-center my-48">
@@ -199,7 +236,25 @@ const SingleBook = () => {
               <button onClick={handleReadButton} className="btn btn-sm btn-secondary text-black font-normal normal-case">
                 Read
               </button>
+              <button
+                onClick={handleWishlistToggle}
+                disabled={isWishlistBusy}
+                className="btn btn-sm btn-outline btn-secondary font-normal normal-case"
+              >
+                {isWishlisted ? (
+                  <FaHeart className="text-secondary" />
+                ) : (
+                  <FaRegHeart />
+                )}
+                {isWishlisted ? "Wishlisted" : "Wishlist"}
+              </button>
             </div>
+            {quantity < 1 && (
+              <p className="text-xs text-error mt-1 text-center px-2">
+                Out of stock — Borrow is unavailable right now. Add it to
+                your wishlist and we will notify you when it is back.
+              </p>
+            )}
             {atBorrowLimit && (
               <p className="text-xs text-warning mt-1">
                 Borrow limit reached ({MAX_ACTIVE_BORROWS}/{MAX_ACTIVE_BORROWS})
