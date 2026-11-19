@@ -18,12 +18,12 @@ const Hero = () => {
   };
 
   return (
-    <div className="hero min-h-[85vh] lg:min-h-screen">
+    <div className="hero min-h-[85vh] lg:min-h-screen grid-cols-1">
       <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse px-4 max-w-full">
         <img
           src={hero}
           alt="Library research illustration"
-          className="max-w-[260px] sm:max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover"
+          className="w-full max-w-[260px] sm:max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover"
         />
         <div className="text-center lg:text-left min-w-0 w-full max-w-full">
           <h1 className="text-2xl sm:text-5xl font-bold playfair leading-tight [overflow-wrap:anywhere]">
