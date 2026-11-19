@@ -18,30 +18,30 @@ const Hero = () => {
   };
 
   return (
-    <div className="hero min-h-screen  ">
-      <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse">
+    <div className="hero min-h-[85vh] lg:min-h-screen">
+      <div className="hero-content flex-col gap-0 lg:gap-10 lg:flex-row-reverse px-4">
         <img
           src={hero}
           alt="Library research illustration"
-          className=" max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover "
+          className="max-w-[260px] sm:max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover"
         />
-        <div>
-          <h1 className="text-5xl font-bold playfair">
+        <div className="text-center lg:text-left">
+          <h1 className="text-4xl sm:text-5xl font-bold playfair">
             Today's research, <br /> tomorrow's innovation
           </h1>
-          <p className="py-6">
+          <p className="py-4 sm:py-6">
             Accelerating research discovery to shape a better future
           </p>
           <form
             onSubmit={handleSearch}
-            className="flex justify-center  items-center"
+            className="flex items-center gap-2 w-full max-w-lg mx-auto lg:mx-0"
           >
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search books, articles, keywords "
-              className="input input-bordered w-2/3 lg:w-4/5 input-primary placeholder:text-primary"
+              className="input input-bordered flex-1 min-w-0 input-primary placeholder:text-primary"
             />
             <button type="submit" className="btn btn-square text-primary ml-1">
               <svg

@@ -23,7 +23,7 @@ const Categories = () => {
     if (isError) {
       return (
         <div className="mt-10 text-center">
-          <h1 className="text-4xl text-center font-bold playfair">
+          <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
             <span className="text-secondary">Books</span> Categories
           </h1>
           <p className="mt-4">Could not load the categories.</p>
@@ -39,10 +39,10 @@ const Categories = () => {
     
     return (
       <div className="mt-10">
-        <h1 className="text-4xl text-center font-bold playfair">
+        <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
           <span className="text-secondary">Books</span> Categories
         </h1>
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           {categories?.map((data) => (
             <CategoriesCard key={data._id} categorie={data}></CategoriesCard>
           ))}

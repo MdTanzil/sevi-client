@@ -48,11 +48,11 @@ const Reading = () => {
         shortDescription,
       } = book;
     return (
-      <div>
-        <h1 className="text-4xl text-center font-bold playfair">
+      <div className="px-2">
+        <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
           <span className="text-secondary">Read</span> More
         </h1>
-        <h2 className=" text-2xl font-semibold text-center playfair mt-8">{name}</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-center playfair mt-8">{name}</h2>
         <p className="mt-3"> {shortDescription}</p>
       </div>
     );

@@ -37,7 +37,7 @@ const BooksAllCategory = () => {
   }
   return (
     <div>
-      <h1 className="text-4xl text-center font-bold playfair mt-5">
+      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair mt-5">
         <span className="text-secondary">{category}</span> Books
       </h1>
       {data.length <= 0 && (
@@ -45,7 +45,7 @@ const BooksAllCategory = () => {
           Do not have any Books{" "}
         </div>
       )}
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {data?.map((d) => (
           <BookCard book={d} key={d._id}></BookCard>
         ))}

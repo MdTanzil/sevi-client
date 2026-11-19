@@ -39,7 +39,7 @@ const BorrowedBooks = () => {
   return (
     <div>
       {" "}
-      <h1 className="text-4xl text-center font-bold playfair">
+      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
         <span className="text-secondary">Borrowed</span> Books
       </h1>
       {data.length <= 0 && (
@@ -47,7 +47,7 @@ const BorrowedBooks = () => {
           Do not have any Books{" "}
         </div>
       )}
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {data?.map((d) => (
           <BorrowCard key={d._id} data={d} refetch={refetch}></BorrowCard>
         ))}

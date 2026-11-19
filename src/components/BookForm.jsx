@@ -61,7 +61,7 @@ const BookForm = ({
 
   return (
     <div className="card bg-base-100 shadow-xl rounded-box max-w-4xl mx-auto">
-      <form className="card-body gap-6" onSubmit={handleSubmit}>
+      <form className="card-body gap-6 p-4 sm:p-8" onSubmit={handleSubmit}>
         <section>
           <h3 className="text-lg font-semibold playfair border-b border-base-300 pb-2 mb-4">
             Basic Information

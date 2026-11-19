@@ -78,9 +78,9 @@ const Register = () => {
   };
   return (
     <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content w-full  ">
+      <div className="hero-content w-full px-4">
         <div className="card  w-full max-w-sm shadow-2xl bg-base-100">
-          <h1 className="text-4xl playfair font-bold text-center my-4 text-primary">
+          <h1 className="text-3xl sm:text-4xl playfair font-bold text-center my-4 text-primary">
             Register now!
           </h1>
 

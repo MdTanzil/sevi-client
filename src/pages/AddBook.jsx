@@ -65,7 +65,7 @@ const AddBook = () => {
 
   return (
     <div className="mt-5">
-      <h1 className="text-4xl text-center font-bold playfair">
+      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
         <span className="text-secondary">Add</span> Books
       </h1>
       <div className="mt-6">

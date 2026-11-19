@@ -71,7 +71,7 @@ const AllBooks = () => {
   return (
     <div>
       <div className="flex justify-center">
-        <h1 className="text-4xl text-center font-bold playfair mt-5 flex items-center  ">
+        <h1 className="text-3xl sm:text-4xl text-center font-bold playfair mt-5 flex flex-wrap items-center justify-center">
           <span className="text-secondary">All</span>{" "}
           <span className="ml-2"> Books </span>
           <span>
@@ -84,7 +84,7 @@ const AllBooks = () => {
           </span>
         </h1>
       </div>
-      <div className="flex justify-center items-center mt-5 gap-2 px-2">
+      <div className="flex flex-wrap justify-center items-center mt-5 gap-2 px-2">
         <input
           type="text"
           value={searchTerm}
@@ -125,7 +125,7 @@ const AllBooks = () => {
           </button>
         </div>
       )}
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {displayData?.map((d) => (
           <BookCard book={d} key={d._id}></BookCard>
         ))}
