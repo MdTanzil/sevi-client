@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Button,
@@ -49,6 +49,7 @@ const formatDate = (value) => {
 
 const UsersAdmin = () => {
   const axios = useAxios();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { isAdmin, isLoading: profileLoading } = useProfile();
   const [userSearch, setUserSearch] = useState("");
@@ -118,6 +119,14 @@ const UsersAdmin = () => {
   const handleDeleteUser = async (member) => {
     setPendingDeleteUser(null);
     setDeletingEmail(member.email);
+    // Optimistic: drop the row from the table immediately. The table
+    // updates in one step instead of sitting unchanged through the
+    // request and then jumping when the refetch lands.
+    queryClient.setQueryData(["users"], (old) =>
+      Array.isArray(old)
+        ? old.filter((u) => u.email !== member.email)
+        : old
+    );
     try {
       await axios.delete(`/admin/users/${encodeURIComponent(member.email)}`);
       toast.success(`"${member.name || member.email}" deleted`);
@@ -127,6 +136,7 @@ const UsersAdmin = () => {
         error?.response?.data?.error ||
           "Could not delete the user. Please try again."
       );
+      refetch();
     } finally {
       setDeletingEmail(null);
     }
@@ -366,13 +376,10 @@ const UsersAdmin = () => {
                       <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody
-                    sx={{
-                      "& .MuiTableRow-root:nth-of-type(odd)": {
-                        backgroundColor: "action.hover",
-                      },
-                    }}
-                  >
+                  {/* No zebra striping: positional stripes flip for every
+                      row below a deleted one, so the whole table flashes
+                      on every delete. The row dividers separate the rows. */}
+                  <TableBody>
                     {pageUsers.map((member) => {
                       const isSelf =
                         member.email?.toLowerCase() ===

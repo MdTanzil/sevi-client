@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -75,6 +75,7 @@ const VALID_SECTIONS = ["overview", "books", "borrows", "categories"];
 
 const Dashboard = () => {
   const axios = useAxios();
+  const queryClient = useQueryClient();
   const { canManageBooks, isLoading: profileLoading } = useProfile();
   const [searchTerm, setSearchTerm] = useState("");
   // The book currently being deleted (its Delete button is disabled).
@@ -277,7 +278,23 @@ const Dashboard = () => {
   // in the error toast.
   const handleDeleteBook = async (book) => {
     setPendingDeleteBook(null);
+    // A borrowed book cannot be deleted — say so immediately instead of
+    // removing the row and then putting it back when the server refuses.
+    if (
+      borrows.some((record) => String(record.bookId) === String(book._id))
+    ) {
+      toast.error(
+        `Cannot delete "${book.name}" — it is currently borrowed.`
+      );
+      return;
+    }
     setDeletingId(book._id);
+    // Optimistic: drop the row from the table immediately. The table
+    // updates in one step instead of sitting unchanged through the
+    // request and then jumping when the refetch lands.
+    queryClient.setQueryData(["allBooks"], (old) =>
+      Array.isArray(old) ? old.filter((b) => b._id !== book._id) : old
+    );
     try {
       await axios.delete(`/books/${book._id}`);
       toast.success(`"${book.name}" deleted`);
@@ -288,6 +305,7 @@ const Dashboard = () => {
         error?.response?.data?.error ||
           "Could not delete the book. Please try again."
       );
+      refetchBooks();
     } finally {
       setDeletingId(null);
     }
@@ -298,7 +316,23 @@ const Dashboard = () => {
   // message is shown in the error toast.
   const handleDeleteCategory = async (category) => {
     setPendingDeleteCategory(null);
+    // A category with books cannot be deleted — say so immediately
+    // instead of removing the row and then putting it back.
+    const booksInCategory = booksPerCategory[category.name] || 0;
+    if (booksInCategory > 0) {
+      toast.error(
+        `Cannot delete "${category.name}" — it still has ${booksInCategory} book(s).`
+      );
+      return;
+    }
     setDeletingCategoryId(category._id);
+    // Optimistic: drop the row from the table immediately (see
+    // handleDeleteBook).
+    queryClient.setQueryData(["categories"], (old) =>
+      Array.isArray(old)
+        ? old.filter((c) => c._id !== category._id)
+        : old
+    );
     try {
       await axios.delete(`/admin/categories/${category._id}`);
       toast.success(`"${category.name}" deleted`);
@@ -308,6 +342,7 @@ const Dashboard = () => {
         error?.response?.data?.error ||
           "Could not delete the category. Please try again."
       );
+      refetchCategories();
     } finally {
       setDeletingCategoryId(null);
     }
@@ -318,6 +353,11 @@ const Dashboard = () => {
   const handleMarkReturned = async (record) => {
     setPendingMarkReturned(null);
     setReturningId(record._id);
+    // Optimistic: drop the row from the active-borrows table immediately
+    // (see handleDeleteBook).
+    queryClient.setQueryData(["adminBorrows"], (old) =>
+      Array.isArray(old) ? old.filter((r) => r._id !== record._id) : old
+    );
     try {
       await axios.post(`/admin/borrows/${record._id}/return`);
       toast.success(`"${record.bookName}" returned`);
@@ -329,6 +369,7 @@ const Dashboard = () => {
         error?.response?.data?.error ||
           "Could not return the book. Please try again."
       );
+      refetchBorrows();
     } finally {
       setReturningId(null);
     }
@@ -608,13 +649,10 @@ const Dashboard = () => {
                       </TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody
-                    sx={{
-                      "& .MuiTableRow-root:nth-of-type(odd)": {
-                        backgroundColor: "action.hover",
-                      },
-                    }}
-                  >
+                  {/* No zebra striping: positional stripes flip for every
+                      row below a deleted one, so the whole table flashes
+                      on every delete. The row dividers separate the rows. */}
+                  <TableBody>
                     {booksPaging.pageItems.map((book) => (
                       <TableRow key={book._id}>
                         <TableCell sx={{ fontWeight: 500 }}>
@@ -829,13 +867,9 @@ const Dashboard = () => {
                           <TableCell>Actions</TableCell>
                         </TableRow>
                       </TableHead>
-                      <TableBody
-                        sx={{
-                          "& .MuiTableRow-root:nth-of-type(odd)": {
-                            backgroundColor: "action.hover",
-                          },
-                        }}
-                      >
+                      {/* No zebra striping here either (see the books
+                          table): positional stripes flash on delete. */}
+                      <TableBody>
                         {categoriesPaging.pageItems.map((category) => (
                           <TableRow key={category._id}>
                             <TableCell>
