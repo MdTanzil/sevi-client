@@ -1,5 +1,6 @@
 import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import logo from "../assets/logo.png";
@@ -9,17 +10,24 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 4,
-        p: { xs: 3, sm: 5 },
         mt: 5,
         bgcolor: (theme) =>
           theme.palette.mode === "dark" ? "grey.900" : "grey.200",
         color: "text.primary",
       }}
     >
-      <Box component="aside" sx={{ minWidth: 200 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 4,
+          justifyContent: "space-between",
+          maxWidth: "80rem",
+          mx: "auto",
+          p: { xs: 3, sm: 5 },
+        }}
+      >
+      <Box component="aside" sx={{ flex: "1.5 1 220px", maxWidth: 340 }}>
         <img src={logo} alt="Sevi logo" />
         <Typography sx={{ fontWeight: 700, fontSize: "1.125rem" }}>
           Sevi
@@ -32,7 +40,7 @@ const Footer = () => {
       </Box>
       <Box
         component="nav"
-        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+        sx={{ display: "flex", flexDirection: "column", gap: 1, flex: "1 1 140px" }}
       >
         <Typography
           sx={{
@@ -60,7 +68,7 @@ const Footer = () => {
       </Box>
       <Box
         component="nav"
-        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+        sx={{ display: "flex", flexDirection: "column", gap: 1, flex: "1 1 140px" }}
       >
         <Typography
           sx={{
@@ -85,7 +93,7 @@ const Footer = () => {
       </Box>
       <Box
         component="nav"
-        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+        sx={{ display: "flex", flexDirection: "column", gap: 1, flex: "1 1 140px" }}
       >
         <Typography
           sx={{
@@ -108,6 +116,15 @@ const Footer = () => {
           Cookie policy
         </Link>
       </Box>
+      </Box>
+      <Divider />
+      <Typography
+        variant="body2"
+        align="center"
+        sx={{ py: 2, opacity: 0.7 }}
+      >
+        © 2026 Sevi — Your community library.
+      </Typography>
     </Box>
   );
 };
