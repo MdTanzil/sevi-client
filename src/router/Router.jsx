@@ -14,6 +14,7 @@ import Error from "../pages/Error";
 import Reading from "../pages/Reading";
 import Profile from "../pages/Profile";
 import UsersAdmin from "../pages/UsersAdmin";
+import Dashboard from "../pages/Dashboard";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Faq from "../pages/Faq";
@@ -98,6 +99,14 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <UsersAdmin></UsersAdmin>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "dashboard",
+        element: (
+          <PrivateRoute>
+            <Dashboard></Dashboard>
           </PrivateRoute>
         ),
       },

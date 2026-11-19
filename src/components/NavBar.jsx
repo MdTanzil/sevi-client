@@ -14,7 +14,7 @@ const NavBar = () => {
   // hamburger menu.
   const links = [
     { to: "/", label: "Home", show: true },
-    { to: "/add-book", label: "Add Book", show: canManageBooks },
+    { to: "/dashboard", label: "Dashboard", show: canManageBooks },
     { to: "/all-book", label: "All Book", show: true },
     { to: "/borrowed-book", label: "Borrowed Book", show: true },
     { to: "/admin/users", label: "Users", show: isAdmin },

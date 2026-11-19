@@ -27,6 +27,12 @@ borrow books, and track borrowed books.
 - Member profiles with roles (member, librarian, admin): a virtual
   membership card, editable name/phone/address, password and email change,
   and an admin page to manage users and their roles
+- Admin/librarian dashboard (`/dashboard`, linked from the navbar instead
+  of Add Book): library stats (books, copies, active/overdue borrows,
+  users, out-of-stock books), a searchable book list with inline stock
+  editing and links to edit/add books, category image editing (thumbnail,
+  URL input with live preview), all active borrows across users
+  with overdue highlighting, and a shortcut to user management (admins)
 - Reading page for borrowed books
 - Authentication with Firebase (email/password and Google sign-in); library
   pages are protected routes. Login obtains a JWT cookie from the API, and
@@ -67,7 +73,7 @@ Firebase configuration is hardcoded in `src/config/firrebase.config.js`.
 ```
 src/
 ├── components/   # Reusable UI: BookForm, SafeImage, Categories, Hero, NavBar, ...
-├── pages/        # Route pages: Home, AllBooks, SingleBook, AddBook, UpdateBook, Profile, UsersAdmin, ...
+├── pages/        # Route pages: Home, AllBooks, SingleBook, AddBook, UpdateBook, Profile, UsersAdmin, Dashboard, ...
 ├── hooks/        # useAuth, useAxios (API client), useProfile (server profile + role helpers)
 ├── provider/     # AuthProvider (Firebase auth context)
 ├── router/       # Router.jsx, PrivateRoute.jsx
