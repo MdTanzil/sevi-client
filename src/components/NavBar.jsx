@@ -19,7 +19,6 @@ const NavBar = () => {
     { to: "/all-book", label: "All Book", show: true },
     { to: "/borrowed-book", label: "Borrowed Book", show: true },
     { to: "/wishlist", label: "Wishlist", show: true },
-    { to: "/admin/users", label: "Users", show: isAdmin },
     { to: "/about", label: "About", show: true },
     { to: "/faq", label: "FAQ", show: true },
   ].filter((link) => link.show);
@@ -100,6 +99,13 @@ const NavBar = () => {
               <li className="lg:hidden" aria-hidden="true">
                 <hr className="my-1 border-base-300" />
               </li>
+              {/* Admin only: user management lives in this dropdown, not
+                  in the main menu. */}
+              {isAdmin && (
+                <li>
+                  <Link to="/admin/users">Users</Link>
+                </li>
+              )}
               <li>
                 <Link to="/profile">My Profile</Link>
               </li>
