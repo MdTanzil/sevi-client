@@ -13,6 +13,10 @@ const OurLibaries = () => {
             src={libraries}
             alt="Sevi libraries"
             className="w-full max-w-[300px] sm:max-w-sm lg:max-w-xl rounded-lg shadow-lg flex-1 object-cover"
+            // Reserve the image's box before it loads (libraries.png is
+            // 937x613) — otherwise the text beside it jumps once the
+            // image arrives.
+            style={{ aspectRatio: "937 / 613" }}
           />
           <Box className="flex-1 text-center lg:text-left">
             <Typography

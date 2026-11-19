@@ -39,7 +39,10 @@ const SingleBook = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["book"],
+    // Keyed on the book id: without it, navigating from one book to
+    // another briefly showed the previous book's details until the
+    // refetch landed.
+    queryKey: ["book", id],
     queryFn: books,
   });
 

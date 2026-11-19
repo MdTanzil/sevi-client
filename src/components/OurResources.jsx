@@ -60,6 +60,11 @@ const OurResources = () => {
                   src={resource.image}
                   alt={resource.alt}
                   className="rounded-xl"
+                  // Reserve the icon's box before it loads (all four
+                  // icons are ~108x113) — otherwise the card text jumps
+                  // down once the image arrives.
+                  width={108}
+                  height={113}
                 />
               </Box>
               <CardContent sx={{ textAlign: "center" }}>

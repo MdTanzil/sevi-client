@@ -591,7 +591,21 @@ const Dashboard = () => {
                       <TableCell>Author</TableCell>
                       <TableCell>Category</TableCell>
                       <TableCell>Stock</TableCell>
-                      <TableCell>Actions</TableCell>
+                      {/* Sticky Actions column: on narrow screens the table
+                          scrolls horizontally, but Edit/Delete stay pinned
+                          on the right instead of sliding out of view. */}
+                      <TableCell
+                        sx={{
+                          position: "sticky",
+                          right: 0,
+                          backgroundColor: "background.paper",
+                          borderLeft: "1px solid",
+                          borderColor: "divider",
+                          zIndex: 1,
+                        }}
+                      >
+                        Actions
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody
@@ -611,7 +625,15 @@ const Dashboard = () => {
                         <TableCell>
                           <StockDisplay book={book} />
                         </TableCell>
-                        <TableCell>
+                        <TableCell
+                          sx={{
+                            position: "sticky",
+                            right: 0,
+                            backgroundColor: "background.paper",
+                            borderLeft: "1px solid",
+                            borderColor: "divider",
+                          }}
+                        >
                           <div className="flex flex-wrap gap-2">
                             <Button
                               component={Link}

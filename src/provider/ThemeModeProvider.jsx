@@ -25,7 +25,7 @@ const readStoredMode = () => {
  * Holds the light/dark mode at the app root: initialized from
  * localStorage ("sevi-theme", default "light"), persisted on change, and
  * passed to MUI's ThemeProvider. Also toggles a `dark` class on <html>
- * so non-MUI UI (SweetAlert2 dialogs, native scrollbars) can restyle
+ * so native UI (scrollbars, form controls, date pickers) can restyle
  * itself via the rules in index.css.
  */
 const ThemeModeProvider = ({ children }) => {
@@ -44,6 +44,11 @@ const ThemeModeProvider = ({ children }) => {
       // for this session, it just won't be remembered.
     }
     document.documentElement.classList.toggle("dark", mode === "dark");
+    // Keep the pre-paint background from index.html in sync when the
+    // mode changes after load (otherwise a stale inline background
+    // would show through around the edges on toggle).
+    document.documentElement.style.backgroundColor =
+      mode === "dark" ? "#121212" : "#ffffff";
   }, [mode]);
 
   const theme = useMemo(() => createSeviTheme(mode), [mode]);

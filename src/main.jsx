@@ -19,6 +19,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <RouterProvider router={router}></RouterProvider>
         <Toaster
           toastOptions={{
+            style: {
+              fontFamily: "'Poppins', sans-serif",
+              borderRadius: 8,
+            },
             success: {
               iconTheme: {
                 primary: "green",
@@ -37,7 +41,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           }}
         ></Toaster>
       </AuthProvider>
-      <ReactQueryDevtools initialIsOpen={false}></ReactQueryDevtools>
+      {/* Devtools only in development — they must not ship in the
+          production bundle. */}
+      {import.meta.env.DEV && (
+        <ReactQueryDevtools initialIsOpen={false}></ReactQueryDevtools>
+      )}
     </QueryClientProvider>
     </ThemeModeProvider>
   </React.StrictMode>

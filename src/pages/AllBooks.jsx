@@ -5,8 +5,8 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Pagination from "@mui/material/Pagination";
+import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { filterBooks } from "../utils/searchBooks";
@@ -43,6 +43,13 @@ const AllBooks = () => {
   useEffect(() => {
     setPage(1);
   }, [searchTerm, filterActive]);
+  // Coming back from the Add Book page (location.state.addpage) means a
+  // new book may exist — refetch once. This must live in an effect: a
+  // refetch during render fires again on every re-render.
+  const cameFromAddPage = location?.state?.addpage;
+  useEffect(() => {
+    if (cameFromAddPage) refetch();
+  }, [cameFromAddPage, refetch]);
   const totalPages = Math.max(1, Math.ceil(displayData.length / PAGE_SIZE));
   // Clamp: the list can shrink under the current page (e.g. a book is
   // deleted while viewing the last page).
@@ -57,15 +64,6 @@ const AllBooks = () => {
   );
   const rangeStart = displayData.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, displayData.length);
-
-  // loging data
-  if (isLoading) {
-    return (
-      <Box className="flex justify-center my-48">
-        <CircularProgress size={56} />
-      </Box>
-    );
-  }
 
   if (isError) {
     return (
@@ -85,10 +83,6 @@ const AllBooks = () => {
     );
   }
 
-  // if  all page routes cll form add page . then refetch
-  if (location?.state?.addpage) {
-    refetch();
-  }
   const handleFilter = () => {
     // Toggle the available-only filter
     setFilterActive(!filterActive);
@@ -157,52 +151,84 @@ const AllBooks = () => {
           </Button>
         )}
       </Box>
-      {displayData.length > 0 && (
-        <Typography sx={{ textAlign: "center", mt: 1.5 }}>
-          Showing {rangeStart}–{rangeEnd} of {displayData.length} books
-          {displayData.length !== data.length && ` (${data.length} total)`}
-        </Typography>
-      )}
-      {data.length <= 0 && (
-        <Box className="my-48 text-center">
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Do not have any Books{" "}
-          </Typography>
-        </Box>
-      )}
-      {data.length > 0 && displayData.length <= 0 && (
-        <Box className="my-48 text-center">
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            No books match your search
-          </Typography>
-          <Typography sx={{ mt: 1 }}>
-            Try a different title, author or category.
-          </Typography>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ mt: 2 }}
-            onClick={handleClearSearch}
-          >
-            Clear Search
-          </Button>
-        </Box>
-      )}
-      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {pageBooks?.map((d) => (
-          <BookCard book={d} key={d._id}></BookCard>
-        ))}
-      </div>
-      {totalPages > 1 && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={(_, value) => setPage(value)}
-            color="primary"
-            aria-label="Books pages"
-          />
-        </Box>
+      {isLoading ? (
+        // Skeleton cards in the exact grid the books will fill — the page
+        // keeps its shape while loading instead of jumping from a lone
+        // spinner to a full grid (which also popped the scrollbar in).
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                borderRadius: 3,
+                overflow: "hidden",
+                bgcolor: "background.paper",
+                boxShadow: 4,
+              }}
+            >
+              <Skeleton
+                variant="rectangular"
+                sx={{ height: { xs: 256, sm: 288 } }}
+              />
+              <Box sx={{ p: 2 }}>
+                <Skeleton variant="text" sx={{ fontSize: "1.125rem" }} />
+                <Skeleton variant="text" width="60%" />
+                <Skeleton variant="text" width="40%" />
+              </Box>
+            </Box>
+          ))}
+        </div>
+      ) : (
+        <>
+          {displayData.length > 0 && (
+            <Typography sx={{ textAlign: "center", mt: 1.5 }}>
+              Showing {rangeStart}–{rangeEnd} of {displayData.length} books
+              {displayData.length !== data.length &&
+                ` (${data.length} total)`}
+            </Typography>
+          )}
+          {data.length <= 0 && (
+            <Box className="my-48 text-center">
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                Do not have any Books{" "}
+              </Typography>
+            </Box>
+          )}
+          {data.length > 0 && displayData.length <= 0 && (
+            <Box className="my-48 text-center">
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                No books match your search
+              </Typography>
+              <Typography sx={{ mt: 1 }}>
+                Try a different title, author or category.
+              </Typography>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ mt: 2 }}
+                onClick={handleClearSearch}
+              >
+                Clear Search
+              </Button>
+            </Box>
+          )}
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {pageBooks?.map((d) => (
+              <BookCard book={d} key={d._id}></BookCard>
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+                aria-label="Books pages"
+              />
+            </Box>
+          )}
+        </>
       )}
     </div>
   );

@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+/* Fonts are loaded with <link> tags in index.html (preconnect +
+   display=swap) instead of a CSS @import, so they start loading in
+   parallel with the CSS and the text does not reflow when they arrive. */
 
 .playfair{
     font-family: 'Playfair Display', serif;
@@ -12,6 +14,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Reserve the scrollbar gutter on every page: without it, navigating
+   from a short page (no scrollbar) to a long one (scrollbar) shifts the
+   whole layout — menu bar included — sideways by the scrollbar width. */
+html {
+  scrollbar-gutter: stable;
+}
 
 /* Safety net: never let a wide element cause horizontal scrolling on
    small screens. */

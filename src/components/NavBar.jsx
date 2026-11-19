@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -19,7 +20,6 @@ import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
 import useThemeMode from "../hooks/useThemeMode";
 import toast from "react-hot-toast";
-import SafeImage from "./SafeImage";
 import NotificationBell from "./NotificationBell";
 
 const NavBar = () => {
@@ -91,20 +91,10 @@ const NavBar = () => {
       });
   };
 
-  // Avatar image: photo when the account has one, otherwise the first
-  // letter of the display name (or email).
-  const avatarImage = user?.photoURL ? (
-    <SafeImage
-      className="w-10 h-10 rounded-full object-cover"
-      src={user.photoURL}
-      alt={user.displayName || user.email}
-      iconClassName="w-5 h-5 opacity-60"
-    />
-  ) : (
-    <span className="text-lg">
-      {(user?.displayName || user?.email || "?")[0]}
-    </span>
-  );
+  // Avatar fallback: the first letter of the display name (or email).
+  // MUI's Avatar shows it until the photo loads, so the avatar never
+  // flashes a placeholder icon first.
+  const avatarInitial = (user?.displayName || user?.email || "?")[0];
 
   return (
     <AppBar
@@ -123,7 +113,7 @@ const NavBar = () => {
               textDecoration: "none",
             }}
           >
-            <img src={logo} alt="Sevi logo" />{" "}
+            <img src={logo} alt="Sevi logo" width={30} height={39} />{" "}
             <Typography
               component="span"
               sx={{
@@ -158,20 +148,43 @@ const NavBar = () => {
             gap: 1,
           }}
         >
-          {user?.displayName && (
-            <Typography
-              component="p"
-              sx={{
-                color: "primary.main",
-                fontSize: "0.875rem",
-                mr: 1,
-                display: { xs: "none", sm: "block" },
-              }}
-            >
-              Hello ! {user.displayName}
-            </Typography>
+          {/* While Firebase is still resolving the auth state, reserve
+              the exact slots the greeting and the bell will occupy —
+              otherwise they pop in one by one after load and the whole
+              right cluster visibly jumps. */}
+          {loading ? (
+            <>
+              <Skeleton
+                variant="text"
+                width={120}
+                sx={{ mr: 1, display: { xs: "none", sm: "block" } }}
+                aria-hidden="true"
+              />
+              <Skeleton
+                variant="circular"
+                width={40}
+                height={40}
+                aria-hidden="true"
+              />
+            </>
+          ) : (
+            <>
+              {user?.displayName && (
+                <Typography
+                  component="p"
+                  sx={{
+                    color: "primary.main",
+                    fontSize: "0.875rem",
+                    mr: 1,
+                    display: { xs: "none", sm: "block" },
+                  }}
+                >
+                  Hello ! {user.displayName}
+                </Typography>
+              )}
+              {user && <NotificationBell />}
+            </>
           )}
-          {user && <NotificationBell />}
           {/* Dark mode toggle — visible to logged-out visitors too. */}
           <IconButton
             onClick={toggleMode}
@@ -195,23 +208,22 @@ const NavBar = () => {
                   variant="dot"
                   color="success"
                 >
-                  <Box
+                  <Avatar
+                    src={user.photoURL || undefined}
+                    alt={user.displayName || user.email}
                     sx={{
                       width: 40,
                       height: 40,
-                      borderRadius: "50%",
-                      overflow: "hidden",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
                       bgcolor: (theme) =>
                         theme.palette.mode === "dark"
                           ? "grey.800"
                           : "grey.200",
+                      color: "primary.main",
+                      fontSize: "1.125rem",
                     }}
                   >
-                    {avatarImage}
-                  </Box>
+                    {avatarInitial}
+                  </Avatar>
                 </Badge>
               </IconButton>
               <Menu

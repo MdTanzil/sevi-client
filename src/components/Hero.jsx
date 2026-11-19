@@ -39,6 +39,10 @@ const Hero = () => {
           src={hero}
           alt="Library research illustration"
           className="w-full max-w-[260px] sm:max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover"
+          // Reserve the image's box before it loads (hero.png is
+          // 1048x1119) — otherwise the text below jumps down once the
+          // image arrives.
+          style={{ aspectRatio: "1048 / 1119" }}
         />
         <Box className="text-center lg:text-left min-w-0 w-full max-w-full">
           <Typography
