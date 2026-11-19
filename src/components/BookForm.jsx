@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PropTypes } from "prop-types";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -47,25 +47,46 @@ const BookForm = ({
   // cover. The rest of the form stays uncontrolled, as before.
   const [isbn, setIsbn] = useState(initialBook.isbn || "");
   const [imageUrl, setImageUrl] = useState(initialBook.imageUrl || "");
+  // Refs mirror the cover URL and whether it was auto-filled, so the
+  // autofill guard sees the latest value even between keystrokes.
+  const imageUrlRef = useRef(initialBook.imageUrl || "");
+  const autoFilledRef = useRef(false);
 
   // Fill the cover from Open Library — but ONLY when the image field is
-  // empty, so a URL the user typed (or one already saved) is never
-  // overwritten.
-  const maybeAutofillCover = (isbnValue, currentImageUrl) => {
+  // empty or was itself auto-filled, so a URL the user typed (or one
+  // already saved) is never overwritten. The auto-filled flag matters
+  // because a 13-digit ISBN passes through a valid 10-digit state while
+  // typing: without it, the 10-digit URL would block the 13-digit one.
+  const maybeAutofillCover = (isbnValue) => {
     const digits = extractIsbnDigits(isbnValue);
-    if (isIsbn(digits) && !currentImageUrl.trim()) {
-      setImageUrl(openLibraryCoverUrl(digits));
+    if (
+      isIsbn(digits) &&
+      (!imageUrlRef.current.trim() || autoFilledRef.current)
+    ) {
+      const url = openLibraryCoverUrl(digits);
+      setImageUrl(url);
+      imageUrlRef.current = url;
+      autoFilledRef.current = true;
     }
   };
 
   const handleIsbnChange = (e) => {
     const value = e.target.value;
     setIsbn(value);
-    maybeAutofillCover(value, imageUrl);
+    maybeAutofillCover(value);
   };
 
   const handleIsbnBlur = () => {
-    maybeAutofillCover(isbn, imageUrl);
+    maybeAutofillCover(isbn);
+  };
+
+  // A URL the user types by hand is theirs — mark it so the autofill
+  // never overwrites it on a later ISBN change.
+  const handleImageChange = (e) => {
+    const value = e.target.value;
+    setImageUrl(value);
+    imageUrlRef.current = value;
+    autoFilledRef.current = false;
   };
 
   const handleSubmit = (e) => {
@@ -279,7 +300,7 @@ const BookForm = ({
                 name="bookImageUrl"
                 placeholder="Book Image Url"
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+                onChange={handleImageChange}
                 required
                 fullWidth
                 InputLabelProps={{ shrink: true }}

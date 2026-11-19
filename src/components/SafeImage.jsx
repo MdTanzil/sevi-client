@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PropTypes } from "prop-types";
 import Box from "@mui/material/Box";
 import { FaBookOpen } from "react-icons/fa";
@@ -10,6 +10,13 @@ import { FaBookOpen } from "react-icons/fa";
  */
 const SafeImage = ({ src, alt, className, iconClassName }) => {
   const [failed, setFailed] = useState(false);
+
+  // A new source deserves a fresh attempt — otherwise a URL typed
+  // character by character (each partial value fails) would stick the
+  // placeholder on forever, even after the URL becomes valid.
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
 
   if (!src || failed) {
     return (
