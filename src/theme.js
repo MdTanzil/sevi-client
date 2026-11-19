@@ -18,6 +18,19 @@ const createSeviTheme = (mode = "light") =>
     typography: {
       fontFamily: "'Poppins', sans-serif",
     },
+    components: {
+      // Menus (avatar dropdown, mobile hamburger menu, notification bell)
+      // must not lock body scroll: MUI's scroll lock adds a padding-right
+      // compensation to the body, which shifts the whole page left every
+      // time a menu opens. Disabling it here covers all menus at once;
+      // nothing in the app relies on menu scroll lock (no Dialog/Modal
+      // is used anywhere, and SweetAlert2 manages its own overlay).
+      MuiMenu: {
+        defaultProps: {
+          disableScrollLock: true,
+        },
+      },
+    },
   });
 
 export default createSeviTheme;
