@@ -12,7 +12,6 @@ import {
   Typography,
 } from "@mui/material";
 import useAxios from "../hooks/useAxios";
-import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
 import { getDueStatus } from "../utils/borrowDates";
@@ -46,7 +45,7 @@ const BorrowCard = ({ data, refetch }) => {
       // the quantity.
       await axios.patch(`/borrows/${_id}/return`);
       await axios.patch(`/books-quantity-increase/${bookId}`);
-      Swal.fire("Successfully return");
+      toast.success("Book returned successfully");
       refetch();
     } catch (error) {
       toast.error(

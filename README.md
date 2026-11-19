@@ -65,8 +65,7 @@ borrow books, and track borrowed books.
 <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" /><img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white" /><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" /><img src="https://img.shields.io/badge/MUI-007FFF?style=for-the-badge&logo=mui&logoColor=white" /><img src="https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black" /><img src="https://img.shields.io/badge/axios-671ddf?&style=for-the-badge&logo=axios&logoColor=white" /><img src="https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E" />
 
 React 18, React Router 6, Vite 4, Tailwind CSS 3 (layout utilities), Material
-UI 9 (components), TanStack Query 5, Axios, Firebase 10, react-hot-toast,
-SweetAlert2.
+UI 9 (components), TanStack Query 5, Axios, Firebase 10, react-hot-toast.
 
 ## Design system
 

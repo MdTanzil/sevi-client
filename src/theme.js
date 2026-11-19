@@ -20,12 +20,18 @@ const createSeviTheme = (mode = "light") =>
     },
     components: {
       // Menus (avatar dropdown, mobile hamburger menu, notification bell)
-      // must not lock body scroll: MUI's scroll lock adds a padding-right
-      // compensation to the body, which shifts the whole page left every
-      // time a menu opens. Disabling it here covers all menus at once;
-      // nothing in the app relies on menu scroll lock (no Dialog/Modal
-      // is used anywhere, and SweetAlert2 manages its own overlay).
+      // and dialogs (category/user/borrow forms, confirmations) must not
+      // lock body scroll: MUI's scroll lock adds a padding-right
+      // compensation to the body, which shifts the whole page sideways
+      // every time a menu or dialog opens. Disabling it here covers all
+      // menus and dialogs at once; nothing in the app relies on their
+      // scroll lock. The mobile dashboard Drawer keeps its own lock.
       MuiMenu: {
+        defaultProps: {
+          disableScrollLock: true,
+        },
+      },
+      MuiDialog: {
         defaultProps: {
           disableScrollLock: true,
         },

@@ -11,16 +11,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import useAuth from "../hooks/useAuth";
-import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import SafeImage from "../components/SafeImage";
 import BookCard from "./BookCard";
-import {
-  MAX_BORROW_DAYS,
-  maxReturnDate,
-  minReturnDate,
-  validateReturnDate,
-} from "../utils/borrowDates";
+import BorrowDialog from "../components/BorrowDialog";
 
 const MAX_ACTIVE_BORROWS = 3;
 const SingleBook = () => {
@@ -34,6 +28,7 @@ const SingleBook = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient();
   const [isWishlistBusy, setIsWishlistBusy] = useState(false);
+  const [borrowDialogOpen, setBorrowDialogOpen] = useState(false);
   const books = async () => {
     const res = await axios.get(`/single-book/${id}`);
     return res.data;
@@ -168,36 +163,18 @@ const SingleBook = () => {
     // if borrowBook already exists
 
     const alreadyBorrowInfo = await axios.get("/borrows");
-    //  console.log(alreadyBorrowInfo.data);
     const findInfo = alreadyBorrowInfo.data.find((d) => d.bookId == _id);
-    // console.log(findInfo);
     if (findInfo) {
-      Swal.fire("You  Already borrowed this book");
+      toast.error("You already borrowed this book");
       return;
     }
 
-    // jodi boita  borrow kora nah thake
-    let retunDate = null;
-    const { value: date } = await Swal.fire({
-      title: "Select return date",
-      text: `Books can be borrowed for up to ${MAX_BORROW_DAYS} days.`,
-      input: "date",
-      // The picker itself only offers today .. today + 5 days, and the
-      // validator guards against a manually typed out-of-range date.
-      inputValidator: (value) => {
-        const check = validateReturnDate(value);
-        return check.valid ? undefined : check.message;
-      },
-      didOpen: () => {
-        const input = Swal.getInput();
-        input.min = minReturnDate();
-        input.max = maxReturnDate();
-      },
-    });
-    if (date) {
-      retunDate = date;
-    }
+    // jodi boita borrow kora nah thake — pick a return date first.
+    setBorrowDialogOpen(true);
+  };
 
+  const handleBorrowConfirm = async (retunDate) => {
+    setBorrowDialogOpen(false);
     const borrowBook = {
       name: user.displayName || "none",
       bookName: name || "",
@@ -213,18 +190,18 @@ const SingleBook = () => {
 
     // Only decrease the quantity after the borrow actually succeeded —
     // a failed borrow (e.g. the 3-book limit) must not touch the stock.
-    if (retunDate) {
-      try {
-        await axios.post("/borrow", borrowBook);
-        await axios.patch(`/books-quantity-decrease/${_id}`);
-        Swal.fire(`Please Return before ${retunDate}`, "successfully borrow");
-        refetch();
-      } catch (error) {
-        toast.error(
-          error?.response?.data?.error ||
-            "Could not borrow the book. Please try again."
-        );
-      }
+    try {
+      await axios.post("/borrow", borrowBook);
+      await axios.patch(`/books-quantity-decrease/${_id}`);
+      toast.success(
+        `Borrowed successfully — please return before ${retunDate}`
+      );
+      refetch();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not borrow the book. Please try again."
+      );
     }
   };
 
@@ -474,6 +451,12 @@ const SingleBook = () => {
           </div>
         </Box>
       )}
+      <BorrowDialog
+        open={borrowDialogOpen}
+        onClose={() => setBorrowDialogOpen(false)}
+        bookName={name}
+        onConfirm={handleBorrowConfirm}
+      />
     </Box>
   );
 };

@@ -29,8 +29,8 @@ import DashboardLayout from "../components/DashboardLayout";
 import AddUserDialog from "../components/AddUserDialog";
 import EditUserDialog from "../components/EditUserDialog";
 import UserHistoryDialog from "../components/UserHistoryDialog";
+import ConfirmDialog from "../components/ConfirmDialog";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
 
 const ROLES = ["member", "librarian", "admin"];
 
@@ -62,6 +62,8 @@ const UsersAdmin = () => {
     user: null,
   });
   const [deletingEmail, setDeletingEmail] = useState(null);
+  // The user awaiting confirmation in the delete dialog.
+  const [pendingDeleteUser, setPendingDeleteUser] = useState(null);
 
   const {
     data: users = [],
@@ -114,15 +116,7 @@ const UsersAdmin = () => {
   // user has an active borrow, and that message is shown in the error
   // toast. The button is hidden for the signed-in user.
   const handleDeleteUser = async (member) => {
-    const { isConfirmed } = await Swal.fire({
-      title: `Delete "${member.name || member.email}"?`,
-      text: "This permanently removes the user, their wishlist and their notifications. Their borrow history stays as library records.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-    });
-    if (!isConfirmed) return;
+    setPendingDeleteUser(null);
     setDeletingEmail(member.email);
     try {
       await axios.delete(`/admin/users/${encodeURIComponent(member.email)}`);
@@ -347,7 +341,7 @@ const UsersAdmin = () => {
                             color="error"
                             size="small"
                             startIcon={<DeleteIcon />}
-                            onClick={() => handleDeleteUser(member)}
+                            onClick={() => setPendingDeleteUser(member)}
                             disabled={deletingEmail === member.email}
                           >
                             {deletingEmail === member.email
@@ -454,7 +448,7 @@ const UsersAdmin = () => {
                                   color="error"
                                   size="small"
                                   startIcon={<DeleteIcon />}
-                                  onClick={() => handleDeleteUser(member)}
+                                  onClick={() => setPendingDeleteUser(member)}
                                   disabled={deletingEmail === member.email}
                                 >
                                   {deletingEmail === member.email
@@ -505,6 +499,17 @@ const UsersAdmin = () => {
         open={historyDialog.open}
         onClose={() => setHistoryDialog({ open: false, user: null })}
         user={historyDialog.user}
+      />
+      <ConfirmDialog
+        open={Boolean(pendingDeleteUser)}
+        onClose={() => setPendingDeleteUser(null)}
+        onConfirm={() => handleDeleteUser(pendingDeleteUser)}
+        title={`Delete "${
+          pendingDeleteUser?.name || pendingDeleteUser?.email
+        }"?`}
+        message="This permanently removes the user, their wishlist and their notifications. Their borrow history stays as library records."
+        confirmLabel="Delete"
+        confirmColor="error"
       />
     </DashboardLayout>
   );

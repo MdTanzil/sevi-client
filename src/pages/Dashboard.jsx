@@ -25,10 +25,10 @@ import CheckIcon from "@mui/icons-material/Check";
 import useAxios from "../hooks/useAxios";
 import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
 import SafeImage from "../components/SafeImage";
 import DashboardLayout from "../components/DashboardLayout";
 import CategoryFormDialog from "../components/CategoryFormDialog";
+import ConfirmDialog from "../components/ConfirmDialog";
 import LendBookDialog from "../components/LendBookDialog";
 import EditReturnDateDialog from "../components/EditReturnDateDialog";
 import { filterBooks } from "../utils/searchBooks";
@@ -79,6 +79,10 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   // The book currently being deleted (its Delete button is disabled).
   const [deletingId, setDeletingId] = useState(null);
+  // The book/category/borrow awaiting confirmation in a dialog.
+  const [pendingDeleteBook, setPendingDeleteBook] = useState(null);
+  const [pendingDeleteCategory, setPendingDeleteCategory] = useState(null);
+  const [pendingMarkReturned, setPendingMarkReturned] = useState(null);
   // Per-section pagination (each resets to 1 when its search changes).
   const [booksPage, setBooksPage] = useState(1);
   const [categorySearch, setCategorySearch] = useState("");
@@ -251,7 +255,7 @@ const Dashboard = () => {
   const userNameByEmail = useMemo(() => {
     const map = {};
     adminUsers.forEach((u) => {
-      map[u.email] = u.name || u.email;
+      map[u.email] = u.name || null;
     });
     return map;
   }, [adminUsers]);
@@ -272,15 +276,7 @@ const Dashboard = () => {
   // a 409 while the book has an active borrow, and that message is shown
   // in the error toast.
   const handleDeleteBook = async (book) => {
-    const { isConfirmed } = await Swal.fire({
-      title: `Delete "${book.name}"?`,
-      text: "This permanently removes the book from the library. Books that are currently borrowed cannot be deleted.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-    });
-    if (!isConfirmed) return;
+    setPendingDeleteBook(null);
     setDeletingId(book._id);
     try {
       await axios.delete(`/books/${book._id}`);
@@ -301,19 +297,7 @@ const Dashboard = () => {
   // server refuses with a 409 while any book uses the category, and that
   // message is shown in the error toast.
   const handleDeleteCategory = async (category) => {
-    const count = booksPerCategory[category.name] || 0;
-    const { isConfirmed } = await Swal.fire({
-      title: `Delete "${category.name}"?`,
-      text:
-        count > 0
-          ? `This category has ${count} book(s) — it cannot be deleted until they move to another category.`
-          : "This permanently removes the category.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-    });
-    if (!isConfirmed) return;
+    setPendingDeleteCategory(null);
     setDeletingCategoryId(category._id);
     try {
       await axios.delete(`/admin/categories/${category._id}`);
@@ -332,15 +316,7 @@ const Dashboard = () => {
   // Mark a borrow returned on the borrower's behalf (book handed back at
   // the desk). The server restores the book quantity by 1.
   const handleMarkReturned = async (record) => {
-    const { isConfirmed } = await Swal.fire({
-      title: `Mark "${record.bookName}" returned?`,
-      text: `Borrowed by ${record.email}. The book quantity will be restored by 1.`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Mark returned",
-      cancelButtonText: "Cancel",
-    });
-    if (!isConfirmed) return;
+    setPendingMarkReturned(null);
     setReturningId(record._id);
     try {
       await axios.post(`/admin/borrows/${record._id}/return`);
@@ -597,7 +573,7 @@ const Dashboard = () => {
                         color="error"
                         size="small"
                         startIcon={<DeleteIcon />}
-                        onClick={() => handleDeleteBook(book)}
+                        onClick={() => setPendingDeleteBook(book)}
                         disabled={deletingId === book._id}
                       >
                         {deletingId === book._id ? "Deleting..." : "Delete"}
@@ -651,7 +627,7 @@ const Dashboard = () => {
                               color="error"
                               size="small"
                               startIcon={<DeleteIcon />}
-                              onClick={() => handleDeleteBook(book)}
+                              onClick={() => setPendingDeleteBook(book)}
                               disabled={deletingId === book._id}
                             >
                               {deletingId === book._id
@@ -806,7 +782,7 @@ const Dashboard = () => {
                               color="error"
                               size="small"
                               startIcon={<DeleteIcon />}
-                              onClick={() => handleDeleteCategory(category)}
+                              onClick={() => setPendingDeleteCategory(category)}
                               disabled={
                                 deletingCategoryId === category._id
                               }
@@ -874,7 +850,7 @@ const Dashboard = () => {
                                   size="small"
                                   startIcon={<DeleteIcon />}
                                   onClick={() =>
-                                    handleDeleteCategory(category)
+                                    setPendingDeleteCategory(category)
                                   }
                                   disabled={
                                     deletingCategoryId === category._id
@@ -937,13 +913,18 @@ const Dashboard = () => {
                     <Typography variant="subtitle1" fontWeight={600}>
                       {userNameByEmail[borrower.email] || borrower.email}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      className="break-all"
-                    >
-                      {borrower.email}
-                    </Typography>
+                    {/* Only show the email line when a real display name
+                        exists — otherwise the email would print twice. */}
+                    {userNameByEmail[borrower.email] &&
+                      userNameByEmail[borrower.email] !== borrower.email && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          className="break-all"
+                        >
+                          {borrower.email}
+                        </Typography>
+                      )}
                     <Typography variant="body2" sx={{ mt: 1 }}>
                       Holding {borrower.count}{" "}
                       {borrower.count === 1 ? "book" : "books"}
@@ -1026,7 +1007,7 @@ const Dashboard = () => {
                           color="success"
                           size="small"
                           startIcon={<CheckIcon />}
-                          onClick={() => handleMarkReturned(record)}
+                          onClick={() => setPendingMarkReturned(record)}
                           disabled={returningId === record._id}
                         >
                           {returningId === record._id
@@ -1110,7 +1091,7 @@ const Dashboard = () => {
                                 color="success"
                                 size="small"
                                 startIcon={<CheckIcon />}
-                                onClick={() => handleMarkReturned(record)}
+                                onClick={() => setPendingMarkReturned(record)}
                                 disabled={returningId === record._id}
                               >
                                 {returningId === record._id
@@ -1173,6 +1154,37 @@ const Dashboard = () => {
           refetchBorrows();
           refetchStats();
         }}
+      />
+      <ConfirmDialog
+        open={Boolean(pendingDeleteBook)}
+        onClose={() => setPendingDeleteBook(null)}
+        onConfirm={() => handleDeleteBook(pendingDeleteBook)}
+        title={`Delete "${pendingDeleteBook?.name}"?`}
+        message="This permanently removes the book from the library. Books that are currently borrowed cannot be deleted."
+        confirmLabel="Delete"
+        confirmColor="error"
+      />
+      <ConfirmDialog
+        open={Boolean(pendingDeleteCategory)}
+        onClose={() => setPendingDeleteCategory(null)}
+        onConfirm={() => handleDeleteCategory(pendingDeleteCategory)}
+        title={`Delete "${pendingDeleteCategory?.name}"?`}
+        message={
+          (booksPerCategory[pendingDeleteCategory?.name] || 0) > 0
+            ? `This category has ${booksPerCategory[pendingDeleteCategory.name]} book(s) — it cannot be deleted until they move to another category.`
+            : "This permanently removes the category."
+        }
+        confirmLabel="Delete"
+        confirmColor="error"
+      />
+      <ConfirmDialog
+        open={Boolean(pendingMarkReturned)}
+        onClose={() => setPendingMarkReturned(null)}
+        onConfirm={() => handleMarkReturned(pendingMarkReturned)}
+        title={`Mark "${pendingMarkReturned?.bookName}" returned?`}
+        message={`Borrowed by ${pendingMarkReturned?.email}. The book quantity will be restored by 1.`}
+        confirmLabel="Mark returned"
+        confirmColor="success"
       />
     </DashboardLayout>
   );
