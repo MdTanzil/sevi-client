@@ -30,12 +30,17 @@ const NavBar = () => {
   // hamburger menu.
   const links = [
     { to: "/", label: "Home", show: true },
-    { to: "/dashboard", label: "Dashboard", show: canManageBooks },
     { to: "/all-book", label: "All Book", show: true },
-    { to: "/borrowed-book", label: "Borrowed Book", show: true },
-    { to: "/wishlist", label: "Wishlist", show: true },
     { to: "/about", label: "About", show: true },
     { to: "/faq", label: "FAQ", show: true },
+  ].filter((link) => link.show);
+
+  // Logged-in-only links — these live in the avatar dropdown, not in the
+  // main menu.
+  const accountLinks = [
+    { to: "/dashboard", label: "Dashboard", show: canManageBooks },
+    { to: "/borrowed-book", label: "Borrowed Book", show: true },
+    { to: "/wishlist", label: "Wishlist", show: true },
   ].filter((link) => link.show);
 
   const navLinkClass = ({ isActive, isPending }) =>
@@ -205,6 +210,19 @@ const NavBar = () => {
                     dropdown — there is no separate hamburger menu. */}
                 {navMenuItems(handleAvatarClose, true)}
                 <Divider sx={{ display: { lg: "none" }, my: 0.5 }} />
+                {/* Account links live in this dropdown, not in the main
+                    menu. */}
+                {accountLinks.map((link) => (
+                  <MenuItem
+                    key={link.to}
+                    component={NavLink}
+                    to={link.to}
+                    onClick={handleAvatarClose}
+                    style={menuLinkStyle}
+                  >
+                    {link.label}
+                  </MenuItem>
+                ))}
                 {/* Admin only: user management lives in this dropdown, not
                     in the main menu. */}
                 {isAdmin && (
