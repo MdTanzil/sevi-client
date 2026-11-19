@@ -35,7 +35,8 @@ borrow books, and track borrowed books.
 - Admin/librarian dashboard (`/dashboard`, linked from the navbar instead
   of Add Book): library stats (books, copies, active/overdue borrows,
   users, out-of-stock books), a searchable book list with inline stock
-  editing and links to edit/add books, category image editing (thumbnail,
+  editing, links to edit/add books, and delete (with confirmation —
+  blocked while a book is borrowed), category image editing (thumbnail,
   URL input with live preview), all active borrows across users
   with overdue highlighting, and a shortcut to user management (admins)
 - Reading page for borrowed books

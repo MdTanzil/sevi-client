@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import useAxios from "../hooks/useAxios";
 import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import SafeImage from "../components/SafeImage";
 import { filterBooks } from "../utils/searchBooks";
 import { getDueStatus } from "../utils/borrowDates";
@@ -159,6 +160,8 @@ const Dashboard = () => {
   const axios = useAxios();
   const { canManageBooks, isAdmin, isLoading: profileLoading } = useProfile();
   const [searchTerm, setSearchTerm] = useState("");
+  // The book currently being deleted (its Delete button is disabled).
+  const [deletingId, setDeletingId] = useState(null);
 
   const {
     data: stats,
@@ -227,6 +230,36 @@ const Dashboard = () => {
   const handleStockSaved = () => {
     refetchBooks();
     refetchStats();
+  };
+
+  // Delete a book from the dashboard (librarian/admin only). Confirms
+  // first — the delete is permanent. The server refuses the delete with
+  // a 409 while the book has an active borrow, and that message is shown
+  // in the error toast.
+  const handleDeleteBook = async (book) => {
+    const { isConfirmed } = await Swal.fire({
+      title: `Delete "${book.name}"?`,
+      text: "This permanently removes the book from the library. Books that are currently borrowed cannot be deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+    });
+    if (!isConfirmed) return;
+    setDeletingId(book._id);
+    try {
+      await axios.delete(`/books/${book._id}`);
+      toast.success(`"${book.name}" deleted`);
+      refetchBooks();
+      refetchStats();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not delete the book. Please try again."
+      );
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handleRetry = () => {
@@ -402,12 +435,21 @@ const Dashboard = () => {
                     <div className="mt-3">
                       <StockCell book={book} onSaved={handleStockSaved} />
                     </div>
-                    <Link
-                      to={`/books-update/${book._id}`}
-                      className="btn btn-sm btn-outline btn-primary poppins mt-3"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <Link
+                        to={`/books-update/${book._id}`}
+                        className="btn btn-sm btn-outline btn-primary poppins"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        className="btn btn-sm btn-outline btn-error poppins"
+                        onClick={() => handleDeleteBook(book)}
+                        disabled={deletingId === book._id}
+                      >
+                        {deletingId === book._id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -436,12 +478,23 @@ const Dashboard = () => {
                           />
                         </td>
                         <td>
-                          <Link
-                            to={`/books-update/${book._id}`}
-                            className="btn btn-sm btn-outline btn-primary poppins"
-                          >
-                            Edit
-                          </Link>
+                          <div className="flex flex-wrap gap-2">
+                            <Link
+                              to={`/books-update/${book._id}`}
+                              className="btn btn-sm btn-outline btn-primary poppins"
+                            >
+                              Edit
+                            </Link>
+                            <button
+                              className="btn btn-sm btn-outline btn-error poppins"
+                              onClick={() => handleDeleteBook(book)}
+                              disabled={deletingId === book._id}
+                            >
+                              {deletingId === book._id
+                                ? "Deleting..."
+                                : "Delete"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
