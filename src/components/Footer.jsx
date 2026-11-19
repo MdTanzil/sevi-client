@@ -14,7 +14,8 @@ const Footer = () => {
         gap: 4,
         p: { xs: 3, sm: 5 },
         mt: 5,
-        bgcolor: "grey.200",
+        bgcolor: (theme) =>
+          theme.palette.mode === "dark" ? "grey.900" : "grey.200",
         color: "text.primary",
       }}
     >

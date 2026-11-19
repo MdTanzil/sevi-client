@@ -143,9 +143,14 @@ const UsersAdmin = () => {
                     member.email?.toLowerCase() ===
                     user?.email?.toLowerCase();
                   return (
-                    <div
+                    <Box
                       key={member.email}
-                      className="rounded-lg border border-gray-300 p-3"
+                      sx={{
+                        borderRadius: 2,
+                        border: 1,
+                        borderColor: "divider",
+                        p: 1.5,
+                      }}
                     >
                       <p className="font-medium">
                         {member.name || "—"}
@@ -187,7 +192,7 @@ const UsersAdmin = () => {
                           </MenuItem>
                         ))}
                       </Select>
-                    </div>
+                    </Box>
                   );
                 })}
               </div>

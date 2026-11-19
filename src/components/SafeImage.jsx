@@ -15,7 +15,11 @@ const SafeImage = ({ src, alt, className, iconClassName }) => {
     return (
       <Box
         className={`flex items-center justify-center ${className || ""}`}
-        sx={{ bgcolor: "grey.200", color: "primary.main" }}
+        sx={{
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark" ? "grey.800" : "grey.200",
+          color: "primary.main",
+        }}
         role="img"
         aria-label={alt}
       >

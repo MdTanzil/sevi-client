@@ -75,7 +75,7 @@ const Login = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "grey.100",
+          backgroundColor: "background.default",
           px: 2,
           py: 4,
         }}

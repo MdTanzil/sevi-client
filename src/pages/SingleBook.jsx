@@ -14,6 +14,7 @@ import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import SafeImage from "../components/SafeImage";
+import BookCard from "./BookCard";
 import {
   MAX_BORROW_DAYS,
   maxReturnDate,
@@ -70,6 +71,21 @@ const SingleBook = () => {
   const isWishlisted = wishlist.some(
     (entry) => String(entry.bookId) === String(id)
   );
+
+  // Other books from the same category, for the "Similar books" section
+  // below. Same endpoint the category pages use; keyed on the category
+  // so it refetches when navigating to a book in another category.
+  const { data: categoryBooks = [] } = useQuery({
+    queryKey: ["similar-books", book?.category],
+    queryFn: async () => {
+      const res = await axios.get(`/books/${book.category}`);
+      return res.data;
+    },
+    enabled: !!book?.category,
+  });
+  const similarBooks = categoryBooks
+    .filter((entry) => String(entry._id) !== String(id))
+    .slice(0, 4);
 
   const handleWishlistToggle = async () => {
     if (isWishlistBusy) return;
@@ -441,6 +457,23 @@ const SingleBook = () => {
           </Box>
         </Box>
       </Box>
+      {similarBooks.length > 0 && (
+        <Box sx={{ mt: 5 }}>
+          <Typography
+            component="h2"
+            variant="h5"
+            className="playfair"
+            sx={{ fontWeight: 600, mb: 2 }}
+          >
+            Similar books
+          </Typography>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {similarBooks.map((similar) => (
+              <BookCard book={similar} key={similar._id} />
+            ))}
+          </div>
+        </Box>
+      )}
     </Box>
   );
 };

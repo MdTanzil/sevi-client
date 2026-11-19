@@ -1,13 +1,21 @@
 /* eslint-disable react/no-unescaped-entities */
 import { Link as RouterLink } from "react-router-dom";
 import SafeImage from "../components/SafeImage";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
 const Error = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center">
-      <div className="container flex flex-col md:flex-row items-center justify-between px-5 text-gray-700">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        bgcolor: "background.default",
+      }}
+    >
+      <div className="container flex flex-col md:flex-row items-center justify-between px-5">
         <div className="w-full lg:w-1/2 mx-2 sm:mx-8">
           <Typography
             variant="h1"
@@ -39,7 +47,7 @@ const Error = () => {
           />
         </div>
       </div>
-    </div>
+    </Box>
   );
 };
 

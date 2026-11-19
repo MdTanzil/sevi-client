@@ -12,9 +12,12 @@ import Skeleton from "@mui/material/Skeleton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import logo from "../assets/logo.png";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
+import useThemeMode from "../hooks/useThemeMode";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
 import NotificationBell from "./NotificationBell";
@@ -22,6 +25,7 @@ import NotificationBell from "./NotificationBell";
 const NavBar = () => {
   const { user, logout, setUser, loading } = useAuth();
   const { canManageBooks, isAdmin } = useProfile();
+  const { mode, toggleMode } = useThemeMode();
   const [avatarAnchorEl, setAvatarAnchorEl] = useState(null);
   const [mobileAnchorEl, setMobileAnchorEl] = useState(null);
 
@@ -168,6 +172,14 @@ const NavBar = () => {
             </Typography>
           )}
           {user && <NotificationBell />}
+          {/* Dark mode toggle — visible to logged-out visitors too. */}
+          <IconButton
+            onClick={toggleMode}
+            aria-label="Toggle dark mode"
+            color="inherit"
+          >
+            {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
           {user && (
             <>
               <IconButton
@@ -192,7 +204,10 @@ const NavBar = () => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      bgcolor: "grey.200",
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "grey.800"
+                          : "grey.200",
                     }}
                   >
                     {avatarImage}

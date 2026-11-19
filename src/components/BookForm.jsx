@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PropTypes } from "prop-types";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -5,8 +6,15 @@ import Card from "@mui/material/Card";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import SafeImage from "./SafeImage";
 
 const currentYear = new Date().getFullYear();
+
+// An ISBN is 10 or 13 digits; hyphens and spaces are ignored.
+const extractIsbnDigits = (value) => value.replace(/[\s-]/g, "");
+const isIsbn = (digits) => /^\d{10}$/.test(digits) || /^\d{13}$/.test(digits);
+const openLibraryCoverUrl = (digits) =>
+  `https://covers.openlibrary.org/b/isbn/${digits}-L.jpg`;
 
 const commonLanguages = [
   "English",
@@ -35,6 +43,31 @@ const BookForm = ({
   submittingLabel = "Saving...",
   onSubmit,
 }) => {
+  // ISBN and cover URL are controlled so the ISBN can auto-fill the
+  // cover. The rest of the form stays uncontrolled, as before.
+  const [isbn, setIsbn] = useState(initialBook.isbn || "");
+  const [imageUrl, setImageUrl] = useState(initialBook.imageUrl || "");
+
+  // Fill the cover from Open Library — but ONLY when the image field is
+  // empty, so a URL the user typed (or one already saved) is never
+  // overwritten.
+  const maybeAutofillCover = (isbnValue, currentImageUrl) => {
+    const digits = extractIsbnDigits(isbnValue);
+    if (isIsbn(digits) && !currentImageUrl.trim()) {
+      setImageUrl(openLibraryCoverUrl(digits));
+    }
+  };
+
+  const handleIsbnChange = (e) => {
+    const value = e.target.value;
+    setIsbn(value);
+    maybeAutofillCover(value, imageUrl);
+  };
+
+  const handleIsbnBlur = () => {
+    maybeAutofillCover(isbn, imageUrl);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -167,7 +200,10 @@ const BookForm = ({
               label="ISBN (optional)"
               name="bookIsbn"
               placeholder="e.g. 9780547928227"
-              defaultValue={initialBook.isbn || ""}
+              value={isbn}
+              onChange={handleIsbnChange}
+              onBlur={handleIsbnBlur}
+              helperText="Cover image will be filled automatically from Open Library if left empty"
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
@@ -236,16 +272,33 @@ const BookForm = ({
             Cover &amp; Stock
           </Typography>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <TextField
-              type="text"
-              label="Book Image Url"
-              name="bookImageUrl"
-              placeholder="Book Image Url"
-              defaultValue={initialBook.imageUrl || ""}
-              required
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
+            <div>
+              <TextField
+                type="text"
+                label="Book Image Url"
+                name="bookImageUrl"
+                placeholder="Book Image Url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                required
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+              {imageUrl.trim() && (
+                <Box
+                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <SafeImage
+                    src={imageUrl.trim()}
+                    alt="Cover preview"
+                    className="h-20 w-14 object-cover rounded"
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Cover preview
+                  </Typography>
+                </Box>
+              )}
+            </div>
             <TextField
               type="number"
               label="Quantity of the book"

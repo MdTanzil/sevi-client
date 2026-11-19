@@ -531,18 +531,24 @@ const Profile = () => {
               <div className="md:hidden space-y-3">
                 {history.map((record) => {
                   const status = getDueStatus(record);
-                  const border =
+                  const borderColor =
                     status === "overdue"
-                      ? "border-red-500"
+                      ? "error.main"
                       : status === "due-soon"
-                      ? "border-amber-500"
+                      ? "warning.main"
                       : status === "returned"
-                      ? "border-green-500"
-                      : "border-gray-300";
+                      ? "success.main"
+                      : "divider";
                   return (
-                    <div
+                    <Box
                       key={record._id}
-                      className={`rounded-lg border border-l-4 ${border} p-3`}
+                      sx={{
+                        borderRadius: 2,
+                        border: 1,
+                        borderLeft: 4,
+                        borderColor,
+                        p: 1.5,
+                      }}
                     >
                       <div className="flex justify-between items-start gap-2">
                         <div className="font-medium">{record.bookName}</div>
@@ -558,7 +564,7 @@ const Profile = () => {
                           Returned: {record.returnedDate || "Not returned"}
                         </p>
                       </div>
-                    </div>
+                    </Box>
                   );
                 })}
               </div>
@@ -578,14 +584,25 @@ const Profile = () => {
                   <TableBody>
                     {history.map((record) => {
                       const status = getDueStatus(record);
-                      const rowClass =
+                      // Theme-aware row tint: a soft red/amber wash that
+                      // reads in both light and dark mode.
+                      const rowBg =
                         status === "overdue"
-                          ? "bg-red-50"
+                          ? (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "rgba(244, 67, 54, 0.25)"
+                                : "rgba(244, 67, 54, 0.06)"
                           : status === "due-soon"
-                          ? "bg-amber-50"
-                          : "";
+                          ? (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "rgba(255, 152, 0, 0.25)"
+                                : "rgba(255, 152, 0, 0.08)"
+                          : undefined;
                       return (
-                        <TableRow key={record._id} className={rowClass}>
+                        <TableRow
+                          key={record._id}
+                          sx={{ backgroundColor: rowBg }}
+                        >
                           <TableCell>
                             <div className="font-medium">
                               {record.bookName}

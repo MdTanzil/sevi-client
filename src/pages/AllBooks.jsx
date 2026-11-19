@@ -2,13 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import useAxios from "../hooks/useAxios";
 import BookCard from "./BookCard";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Pagination from "@mui/material/Pagination";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { filterBooks } from "../utils/searchBooks";
+
+const PAGE_SIZE = 12;
 const AllBooks = () => {
   const axios = useAxios();
   const location = useLocation();
@@ -33,6 +36,27 @@ const AllBooks = () => {
     () => filterBooks(data, searchTerm, filterActive),
     [data, searchTerm, filterActive]
   );
+
+  // Pagination applies AFTER the search/filter, across all matching
+  // books. The page resets to 1 whenever the search or filter changes.
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, filterActive]);
+  const totalPages = Math.max(1, Math.ceil(displayData.length / PAGE_SIZE));
+  // Clamp: the list can shrink under the current page (e.g. a book is
+  // deleted while viewing the last page).
+  const currentPage = Math.min(page, totalPages);
+  const pageBooks = useMemo(
+    () =>
+      displayData.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE
+      ),
+    [displayData, currentPage]
+  );
+  const rangeStart = displayData.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, displayData.length);
 
   // loging data
   if (isLoading) {
@@ -74,8 +98,6 @@ const AllBooks = () => {
     setSearchTerm("");
     setFilterActive(false);
   };
-
-  const isFiltering = searchTerm.trim() !== "" || filterActive;
 
   return (
     <div>
@@ -135,9 +157,10 @@ const AllBooks = () => {
           </Button>
         )}
       </Box>
-      {isFiltering && data.length > 0 && (
+      {displayData.length > 0 && (
         <Typography sx={{ textAlign: "center", mt: 1.5 }}>
-          Showing {displayData.length} of {data.length} books
+          Showing {rangeStart}–{rangeEnd} of {displayData.length} books
+          {displayData.length !== data.length && ` (${data.length} total)`}
         </Typography>
       )}
       {data.length <= 0 && (
@@ -166,10 +189,21 @@ const AllBooks = () => {
         </Box>
       )}
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {displayData?.map((d) => (
+        {pageBooks?.map((d) => (
           <BookCard book={d} key={d._id}></BookCard>
         ))}
       </div>
+      {totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            aria-label="Books pages"
+          />
+        </Box>
+      )}
     </div>
   );
 };

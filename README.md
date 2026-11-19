@@ -10,12 +10,18 @@ borrow books, and track borrowed books.
 
 - Browse books by category (12 categories on the home page)
 - Search books by title, author, or category — on the All Books page and from
-  the home page hero search box
+  the home page hero search box; the All Books list is paginated (12 books
+  per page) with a "Showing X–Y of Z books" count
 - Book details with rating, description, and metadata (ISBN, publisher,
-  published year, language, pages)
+  published year, language, pages), plus a "Similar books" section with up
+  to 4 other books from the same category
 - Add and update books through a shared form (sections: Basic Information,
   Publication Details, Cover & Stock, Description) — librarians and admins
-  only
+  only. Typing an ISBN auto-fills the cover image from Open Library when
+  the image field is empty, and the form shows a cover preview
+- Dark mode: a sun/moon toggle in the navbar switches the whole app
+  between light and dark themes; the choice is saved in the browser
+  (localStorage)
 - Borrow books with a return date, view borrowed books, and return them
   (max 3 books at a time); borrow history is kept on the profile page
 - Wishlist: save books to a personal wishlist from the book details page
@@ -61,9 +67,13 @@ SweetAlert2.
 
 All UI components are Material UI, themed in `src/theme.js` with the Sevi
 brand colors: primary purple `#723182`, secondary yellow `#fdc800`, Poppins
-body font (Playfair Display for the hero heading). The app is wrapped in
-MUI's `ThemeProvider` + `CssBaseline` in `src/main.jsx`. Tailwind is kept
-only for layout utilities (spacing, flex/grid, responsive classes).
+body font (Playfair Display for the hero heading). The theme is a factory
+(`createSeviTheme(mode)`) with light and dark palettes — the brand colors
+stay the same in both modes — and `src/provider/ThemeModeProvider.jsx` holds
+the mode (saved in localStorage as `sevi-theme`, toggled from the navbar)
+and wraps the app in MUI's `ThemeProvider` + `CssBaseline` in
+`src/main.jsx`. Tailwind is kept only for layout utilities (spacing,
+flex/grid, responsive classes).
 
 ## Getting started
 

@@ -23,7 +23,10 @@ const CategoriesCard = ({ categorie }) => {
     >
       <Box
         className="h-48 w-full lg:h-auto lg:w-64 shrink-0"
-        sx={{ bgcolor: "grey.200" }}
+        sx={{
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark" ? "grey.800" : "grey.200",
+        }}
       >
         <SafeImage
           src={image}
