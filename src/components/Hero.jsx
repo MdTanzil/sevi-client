@@ -25,9 +25,10 @@ const Hero = () => {
           alt="Library research illustration"
           className="max-w-[260px] sm:max-w-xs lg:max-w-lg rounded-lg shadow-sm lg:shadow-2xl object-cover"
         />
-        <div className="text-center lg:text-left">
-          <h1 className="text-4xl sm:text-5xl font-bold playfair">
-            Today's research, <br /> tomorrow's innovation
+        <div className="text-center lg:text-left min-w-0 w-full">
+          <h1 className="text-3xl sm:text-5xl font-bold playfair leading-tight break-words">
+            Today's research, <br className="hidden sm:block" /> tomorrow's
+            innovation
           </h1>
           <p className="py-4 sm:py-6">
             Accelerating research discovery to shape a better future
