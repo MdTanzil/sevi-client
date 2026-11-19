@@ -9,6 +9,7 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -20,14 +21,21 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CheckIcon from "@mui/icons-material/Check";
 import useAxios from "../hooks/useAxios";
 import useProfile from "../hooks/useProfile";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import SafeImage from "../components/SafeImage";
 import DashboardLayout from "../components/DashboardLayout";
+import CategoryFormDialog from "../components/CategoryFormDialog";
+import LendBookDialog from "../components/LendBookDialog";
+import EditReturnDateDialog from "../components/EditReturnDateDialog";
 import { filterBooks } from "../utils/searchBooks";
 import { getDueStatus } from "../utils/borrowDates";
+
+// Rows per page in the dashboard tables (books, categories, borrows).
+const PAGE_SIZE = 10;
 
 // Status badge for an active borrow record: overdue (past the return
 // date) is red, due today/tomorrow is amber, anything else is blue.
@@ -71,6 +79,24 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   // The book currently being deleted (its Delete button is disabled).
   const [deletingId, setDeletingId] = useState(null);
+  // Per-section pagination (each resets to 1 when its search changes).
+  const [booksPage, setBooksPage] = useState(1);
+  const [categorySearch, setCategorySearch] = useState("");
+  const [categoriesPage, setCategoriesPage] = useState(1);
+  const [borrowsPage, setBorrowsPage] = useState(1);
+  // Category add/edit dialog: { open, category } (category null = add).
+  const [categoryDialog, setCategoryDialog] = useState({
+    open: false,
+    category: null,
+  });
+  const [deletingCategoryId, setDeletingCategoryId] = useState(null);
+  const [lendDialogOpen, setLendDialogOpen] = useState(false);
+  // Edit-return-date dialog: { open, record }.
+  const [editReturnDialog, setEditReturnDialog] = useState({
+    open: false,
+    record: null,
+  });
+  const [returningId, setReturningId] = useState(null);
 
   // Visible dashboard section, from the ?section= query param so the URL
   // stays shareable and refresh-safe (unknown values fall back to
@@ -149,10 +175,86 @@ const Dashboard = () => {
     enabled: canManageBooks,
   });
 
+  // Users, for borrower display names in the tracking summary and for
+  // the lend dialog's user selector.
+  const {
+    data: adminUsers = [],
+    isLoading: adminUsersLoading,
+    isError: adminUsersError,
+    refetch: refetchAdminUsers,
+  } = useQuery({
+    queryKey: ["adminUsers"],
+    queryFn: async () => {
+      const res = await axios.get("/admin/users");
+      return res.data;
+    },
+    enabled: canManageBooks,
+  });
+
   const displayBooks = useMemo(
     () => filterBooks(books, searchTerm),
     [books, searchTerm]
   );
+
+  // Pagination applies AFTER the search/filter. The page clamps when the
+  // list shrinks under it (e.g. a book is deleted on the last page).
+  const paginate = (list, page) => {
+    const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    const currentPage = Math.min(page, totalPages);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return {
+      totalPages,
+      currentPage,
+      pageItems: list.slice(start, start + PAGE_SIZE),
+      rangeStart: list.length === 0 ? 0 : start + 1,
+      rangeEnd: Math.min(start + PAGE_SIZE, list.length),
+    };
+  };
+  const booksPaging = paginate(displayBooks, booksPage);
+  const borrowsPaging = paginate(borrows, borrowsPage);
+
+  // Categories, filtered by the search box, then paginated.
+  const displayCategories = useMemo(() => {
+    const term = categorySearch.trim().toLowerCase();
+    if (!term) return categories;
+    return categories.filter((c) =>
+      c.name?.toLowerCase().includes(term)
+    );
+  }, [categories, categorySearch]);
+  const categoriesPaging = paginate(displayCategories, categoriesPage);
+
+  // Borrow tracking: group the active borrows by borrower — how many
+  // books each user currently holds, and their earliest due date.
+  const borrowerSummary = useMemo(() => {
+    const byEmail = {};
+    borrows.forEach((record) => {
+      const email = record.email || "Unknown";
+      if (!byEmail[email]) {
+        byEmail[email] = {
+          email,
+          count: 0,
+          earliestDue: record.retunDate || null,
+        };
+      }
+      byEmail[email].count += 1;
+      if (
+        record.retunDate &&
+        (!byEmail[email].earliestDue ||
+          record.retunDate < byEmail[email].earliestDue)
+      ) {
+        byEmail[email].earliestDue = record.retunDate;
+      }
+    });
+    return Object.values(byEmail).sort((a, b) => b.count - a.count);
+  }, [borrows]);
+
+  const userNameByEmail = useMemo(() => {
+    const map = {};
+    adminUsers.forEach((u) => {
+      map[u.email] = u.name || u.email;
+    });
+    return map;
+  }, [adminUsers]);
 
   // Books per category, for the Categories table (counted client-side
   // from the already-fetched book list).
@@ -195,11 +297,73 @@ const Dashboard = () => {
     }
   };
 
+  // Delete a category from the dashboard (librarian/admin only). The
+  // server refuses with a 409 while any book uses the category, and that
+  // message is shown in the error toast.
+  const handleDeleteCategory = async (category) => {
+    const count = booksPerCategory[category.name] || 0;
+    const { isConfirmed } = await Swal.fire({
+      title: `Delete "${category.name}"?`,
+      text:
+        count > 0
+          ? `This category has ${count} book(s) — it cannot be deleted until they move to another category.`
+          : "This permanently removes the category.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+    });
+    if (!isConfirmed) return;
+    setDeletingCategoryId(category._id);
+    try {
+      await axios.delete(`/admin/categories/${category._id}`);
+      toast.success(`"${category.name}" deleted`);
+      refetchCategories();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not delete the category. Please try again."
+      );
+    } finally {
+      setDeletingCategoryId(null);
+    }
+  };
+
+  // Mark a borrow returned on the borrower's behalf (book handed back at
+  // the desk). The server restores the book quantity by 1.
+  const handleMarkReturned = async (record) => {
+    const { isConfirmed } = await Swal.fire({
+      title: `Mark "${record.bookName}" returned?`,
+      text: `Borrowed by ${record.email}. The book quantity will be restored by 1.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Mark returned",
+      cancelButtonText: "Cancel",
+    });
+    if (!isConfirmed) return;
+    setReturningId(record._id);
+    try {
+      await axios.post(`/admin/borrows/${record._id}/return`);
+      toast.success(`"${record.bookName}" returned`);
+      refetchBorrows();
+      refetchBooks();
+      refetchStats();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not return the book. Please try again."
+      );
+    } finally {
+      setReturningId(null);
+    }
+  };
+
   const handleRetry = () => {
     refetchStats();
     refetchBooks();
     refetchBorrows();
     refetchCategories();
+    refetchAdminUsers();
   };
 
   if (profileLoading) {
@@ -231,7 +395,13 @@ const Dashboard = () => {
     );
   }
 
-  if (statsLoading || booksLoading || borrowsLoading || categoriesLoading) {
+  if (
+    statsLoading ||
+    booksLoading ||
+    borrowsLoading ||
+    categoriesLoading ||
+    adminUsersLoading
+  ) {
     return (
       <div className="flex justify-center my-48">
         <CircularProgress size={48} />
@@ -239,7 +409,13 @@ const Dashboard = () => {
     );
   }
 
-  if (statsError || booksError || borrowsError || categoriesError) {
+  if (
+    statsError ||
+    booksError ||
+    borrowsError ||
+    categoriesError ||
+    adminUsersError
+  ) {
     return (
       <div className="my-48 text-center">
         <p className="text-2xl font-bold">Could not load the dashboard</p>
@@ -330,7 +506,10 @@ const Dashboard = () => {
           type="text"
           size="small"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setBooksPage(1);
+          }}
           placeholder="Search by title, author or category"
           sx={{ width: "100%", maxWidth: "28rem" }}
         />
@@ -338,15 +517,20 @@ const Dashboard = () => {
           <Button
             variant="outlined"
             size="small"
-            onClick={() => setSearchTerm("")}
+            onClick={() => {
+              setSearchTerm("");
+              setBooksPage(1);
+            }}
           >
             Clear
           </Button>
         )}
       </div>
-      {searchTerm.trim() !== "" && books.length > 0 && (
+      {books.length > 0 && (
         <p className="mt-3 poppins">
-          Showing {displayBooks.length} of {books.length} books
+          Showing {booksPaging.rangeStart}–{booksPaging.rangeEnd} of{" "}
+          {displayBooks.length} books
+          {searchTerm.trim() !== "" && ` (${books.length} total)`}
         </p>
       )}
       <Card elevation={4} className="mt-4 mb-6">
@@ -367,7 +551,10 @@ const Dashboard = () => {
               <Button
                 variant="contained"
                 size="small"
-                onClick={() => setSearchTerm("")}
+                onClick={() => {
+                  setSearchTerm("");
+                  setBooksPage(1);
+                }}
                 sx={{ mt: 2 }}
               >
                 Clear Search
@@ -377,7 +564,7 @@ const Dashboard = () => {
             <>
               {/* Mobile: stacked cards (a 5-column table does not fit). */}
               <div className="md:hidden space-y-3">
-                {displayBooks.map((book) => (
+                {booksPaging.pageItems.map((book) => (
                   <Box
                     key={book._id}
                     sx={{
@@ -438,7 +625,7 @@ const Dashboard = () => {
                       },
                     }}
                   >
-                    {displayBooks.map((book) => (
+                    {booksPaging.pageItems.map((book) => (
                       <TableRow key={book._id}>
                         <TableCell sx={{ fontWeight: 500 }}>
                           {book.name}
@@ -482,13 +669,69 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
+      {booksPaging.totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
+          <Pagination
+            count={booksPaging.totalPages}
+            page={booksPaging.currentPage}
+            onChange={(_event, page) => setBooksPage(page)}
+            color="primary"
+            aria-label="Books pages"
+          />
+        </Box>
+      )}
         </>
       )}
 
-      {/* Categories: thumbnail, name, and book count in a table. */}
+      {/* Categories: searchable table with add, edit and delete. */}
       {section === "categories" && (
         <>
-          <h2 className="text-2xl font-bold playfair mt-6">Categories</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
+            <h2 className="text-2xl font-bold playfair">Categories</h2>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() =>
+                setCategoryDialog({ open: true, category: null })
+              }
+            >
+              Add Category
+            </Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            <TextField
+              type="text"
+              size="small"
+              value={categorySearch}
+              onChange={(e) => {
+                setCategorySearch(e.target.value);
+                setCategoriesPage(1);
+              }}
+              placeholder="Search categories by name"
+              sx={{ width: "100%", maxWidth: "28rem" }}
+            />
+            {categorySearch && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  setCategorySearch("");
+                  setCategoriesPage(1);
+                }}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          {categories.length > 0 && (
+            <p className="mt-3 poppins">
+              Showing {categoriesPaging.rangeStart}–
+              {categoriesPaging.rangeEnd} of {displayCategories.length}{" "}
+              categories
+              {categorySearch.trim() !== "" &&
+                ` (${categories.length} total)`}
+            </p>
+          )}
           <Card elevation={4} className="mt-4 mb-6">
             <CardContent
               sx={{
@@ -500,58 +743,225 @@ const Dashboard = () => {
                 <p className="text-center my-8 opacity-70">
                   No categories yet.
                 </p>
+              ) : displayCategories.length === 0 ? (
+                <div className="text-center my-8">
+                  <p className="text-xl font-bold">
+                    No categories match your search
+                  </p>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => {
+                      setCategorySearch("");
+                      setCategoriesPage(1);
+                    }}
+                    sx={{ mt: 2 }}
+                  >
+                    Clear Search
+                  </Button>
+                </div>
               ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Image</TableCell>
-                        <TableCell>Category</TableCell>
-                        <TableCell>Books</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody
-                      sx={{
-                        "& .MuiTableRow-root:nth-of-type(odd)": {
-                          backgroundColor: "action.hover",
-                        },
-                      }}
-                    >
-                      {categories.map((category) => (
-                        <TableRow key={category._id}>
-                          <TableCell>
-                            <SafeImage
-                              src={category.image}
-                              alt={`${category.name} category image`}
-                              className="h-12 w-16 object-cover rounded"
-                            />
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 500 }}>
-                            {category.name}
-                          </TableCell>
-                          <TableCell>
-                            {booksPerCategory[category.name] || 0}
-                          </TableCell>
+                <>
+                  {/* Mobile: stacked cards. */}
+                  <div className="md:hidden space-y-3">
+                    {categoriesPaging.pageItems.map((category) => (
+                      <Box
+                        key={category._id}
+                        sx={{
+                          borderRadius: 2,
+                          border: 1,
+                          borderColor: "divider",
+                          p: 1.5,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                        }}
+                      >
+                        <SafeImage
+                          src={category.image}
+                          alt={`${category.name} category image`}
+                          className="h-12 w-16 object-cover rounded shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium">{category.name}</p>
+                          <p className="text-sm opacity-70">
+                            {booksPerCategory[category.name] || 0} books
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<EditIcon />}
+                              onClick={() =>
+                                setCategoryDialog({
+                                  open: true,
+                                  category,
+                                })
+                              }
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDeleteCategory(category)}
+                              disabled={
+                                deletingCategoryId === category._id
+                              }
+                            >
+                              {deletingCategoryId === category._id
+                                ? "Deleting..."
+                                : "Delete"}
+                            </Button>
+                          </div>
+                        </div>
+                      </Box>
+                    ))}
+                  </div>
+                  {/* Desktop: the full table. */}
+                  <TableContainer className="hidden md:block">
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Image</TableCell>
+                          <TableCell>Category</TableCell>
+                          <TableCell>Books</TableCell>
+                          <TableCell>Actions</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody
+                        sx={{
+                          "& .MuiTableRow-root:nth-of-type(odd)": {
+                            backgroundColor: "action.hover",
+                          },
+                        }}
+                      >
+                        {categoriesPaging.pageItems.map((category) => (
+                          <TableRow key={category._id}>
+                            <TableCell>
+                              <SafeImage
+                                src={category.image}
+                                alt={`${category.name} category image`}
+                                className="h-12 w-16 object-cover rounded"
+                              />
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: 500 }}>
+                              {category.name}
+                            </TableCell>
+                            <TableCell>
+                              {booksPerCategory[category.name] || 0}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<EditIcon />}
+                                  onClick={() =>
+                                    setCategoryDialog({
+                                      open: true,
+                                      category,
+                                    })
+                                  }
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outlined"
+                                  color="error"
+                                  size="small"
+                                  startIcon={<DeleteIcon />}
+                                  onClick={() =>
+                                    handleDeleteCategory(category)
+                                  }
+                                  disabled={
+                                    deletingCategoryId === category._id
+                                  }
+                                >
+                                  {deletingCategoryId === category._id
+                                    ? "Deleting..."
+                                    : "Delete"}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
               )}
             </CardContent>
           </Card>
+          {categoriesPaging.totalPages > 1 && (
+            <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
+              <Pagination
+                count={categoriesPaging.totalPages}
+                page={categoriesPaging.currentPage}
+                onChange={(_event, page) => setCategoriesPage(page)}
+                color="primary"
+                aria-label="Categories pages"
+              />
+            </Box>
+          )}
         </>
       )}
 
-      {/* Active borrows across all users. */}
+      {/* Active borrows across all users, with per-user tracking. */}
       {section === "borrows" && (
         <>
-          <h2 className="text-2xl font-bold playfair mt-6">
-        Active Borrows
-        <span className="text-base font-normal opacity-70 ml-2">
-          ({borrows.length})
-        </span>
-      </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
+            <h2 className="text-2xl font-bold playfair">
+              Active Borrows
+              <span className="text-base font-normal opacity-70 ml-2">
+                ({borrows.length})
+              </span>
+            </h2>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => setLendDialogOpen(true)}
+            >
+              Lend a Book
+            </Button>
+          </div>
+          {/* Tracking: who is holding books, how many, and the earliest
+              due date per borrower. */}
+          {borrowerSummary.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-4">
+              {borrowerSummary.map((borrower) => (
+                <Card key={borrower.email} elevation={2}>
+                  <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {userNameByEmail[borrower.email] || borrower.email}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      className="break-all"
+                    >
+                      {borrower.email}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Holding {borrower.count}{" "}
+                      {borrower.count === 1 ? "book" : "books"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Earliest due: {borrower.earliestDue || "—"}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          {borrows.length > 0 && (
+            <p className="mt-4 poppins">
+              Showing {borrowsPaging.rangeStart}–{borrowsPaging.rangeEnd} of{" "}
+              {borrows.length} active borrows
+            </p>
+          )}
       <Card elevation={4} className="mt-4 mb-6">
         <CardContent
           sx={{
@@ -565,9 +975,9 @@ const Dashboard = () => {
             </p>
           ) : (
             <>
-              {/* Mobile: stacked cards (a 5-column table does not fit). */}
+              {/* Mobile: stacked cards (a 6-column table does not fit). */}
               <div className="md:hidden space-y-3">
-                {borrows.map((record) => {
+                {borrowsPaging.pageItems.map((record) => {
                   const status = getDueStatus(record);
                   const borderColor =
                     status === "overdue"
@@ -600,6 +1010,30 @@ const Dashboard = () => {
                         <p>Borrowed: {record.borrowedDate || "—"}</p>
                         <p>Due: {record.retunDate || "—"}</p>
                       </div>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={() =>
+                            setEditReturnDialog({ open: true, record })
+                          }
+                        >
+                          Edit date
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="success"
+                          size="small"
+                          startIcon={<CheckIcon />}
+                          onClick={() => handleMarkReturned(record)}
+                          disabled={returningId === record._id}
+                        >
+                          {returningId === record._id
+                            ? "Returning..."
+                            : "Mark returned"}
+                        </Button>
+                      </div>
                     </Box>
                   );
                 })}
@@ -615,10 +1049,11 @@ const Dashboard = () => {
                       <TableCell>Borrowed</TableCell>
                       <TableCell>Due</TableCell>
                       <TableCell>Status</TableCell>
+                      <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {borrows.map((record) => {
+                    {borrowsPaging.pageItems.map((record) => {
                       const status = getDueStatus(record);
                       // Theme-aware row tint: a soft red/amber wash that
                       // reads in both light and dark mode.
@@ -655,6 +1090,35 @@ const Dashboard = () => {
                           <TableCell>
                             <DueBadge record={record} />
                           </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<EditIcon />}
+                                onClick={() =>
+                                  setEditReturnDialog({
+                                    open: true,
+                                    record,
+                                  })
+                                }
+                              >
+                                Edit date
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                color="success"
+                                size="small"
+                                startIcon={<CheckIcon />}
+                                onClick={() => handleMarkReturned(record)}
+                                disabled={returningId === record._id}
+                              >
+                                {returningId === record._id
+                                  ? "Returning..."
+                                  : "Mark returned"}
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -665,8 +1129,51 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
+      {borrowsPaging.totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
+          <Pagination
+            count={borrowsPaging.totalPages}
+            page={borrowsPaging.currentPage}
+            onChange={(_event, page) => setBorrowsPage(page)}
+            color="primary"
+            aria-label="Borrows pages"
+          />
+        </Box>
+      )}
         </>
       )}
+
+      {/* Dialogs shared by the sections above. */}
+      <CategoryFormDialog
+        open={categoryDialog.open}
+        onClose={() => setCategoryDialog({ open: false, category: null })}
+        category={categoryDialog.category}
+        onSaved={() => {
+          refetchCategories();
+          refetchBooks();
+          refetchStats();
+        }}
+      />
+      <LendBookDialog
+        open={lendDialogOpen}
+        onClose={() => setLendDialogOpen(false)}
+        users={adminUsers}
+        books={books}
+        onSaved={() => {
+          refetchBorrows();
+          refetchBooks();
+          refetchStats();
+        }}
+      />
+      <EditReturnDateDialog
+        open={editReturnDialog.open}
+        onClose={() => setEditReturnDialog({ open: false, record: null })}
+        record={editReturnDialog.record}
+        onSaved={() => {
+          refetchBorrows();
+          refetchStats();
+        }}
+      />
     </DashboardLayout>
   );
 };

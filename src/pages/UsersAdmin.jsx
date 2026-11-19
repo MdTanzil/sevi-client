@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -8,6 +9,7 @@ import {
   Chip,
   CircularProgress,
   MenuItem,
+  Pagination,
   Select,
   Table,
   TableBody,
@@ -15,14 +17,25 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import HistoryIcon from "@mui/icons-material/History";
 import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
 import DashboardLayout from "../components/DashboardLayout";
+import AddUserDialog from "../components/AddUserDialog";
+import EditUserDialog from "../components/EditUserDialog";
+import UserHistoryDialog from "../components/UserHistoryDialog";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const ROLES = ["member", "librarian", "admin"];
+
+// Rows per page in the users table.
+const PAGE_SIZE = 10;
 
 const formatDate = (value) => {
   const date = new Date(value);
@@ -38,6 +51,17 @@ const UsersAdmin = () => {
   const axios = useAxios();
   const { user } = useAuth();
   const { isAdmin, isLoading: profileLoading } = useProfile();
+  const [userSearch, setUserSearch] = useState("");
+  const [usersPage, setUsersPage] = useState(1);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  // Edit-profile dialog: { open, user }.
+  const [editDialog, setEditDialog] = useState({ open: false, user: null });
+  // Borrow-history dialog: { open, user }.
+  const [historyDialog, setHistoryDialog] = useState({
+    open: false,
+    user: null,
+  });
+  const [deletingEmail, setDeletingEmail] = useState(null);
 
   const {
     data: users = [],
@@ -53,6 +77,27 @@ const UsersAdmin = () => {
     enabled: isAdmin,
   });
 
+  // Search by name or email, then paginate. The page clamps when the
+  // list shrinks under it (e.g. a user is deleted on the last page).
+  const displayUsers = useMemo(() => {
+    const term = userSearch.trim().toLowerCase();
+    if (!term) return users;
+    return users.filter(
+      (member) =>
+        member.name?.toLowerCase().includes(term) ||
+        member.email?.toLowerCase().includes(term)
+    );
+  }, [users, userSearch]);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(displayUsers.length / PAGE_SIZE)
+  );
+  const currentPage = Math.min(usersPage, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageUsers = displayUsers.slice(pageStart, pageStart + PAGE_SIZE);
+  const rangeStart = displayUsers.length === 0 ? 0 : pageStart + 1;
+  const rangeEnd = Math.min(pageStart + PAGE_SIZE, displayUsers.length);
+
   const handleRoleChange = async (email, role) => {
     try {
       await axios.put(`/users/${encodeURIComponent(email)}/role`, { role });
@@ -62,6 +107,34 @@ const UsersAdmin = () => {
       toast.error(
         error?.response?.data?.error || "Could not update the role"
       );
+    }
+  };
+
+  // Delete a user (admin only). The server refuses with a 409 while the
+  // user has an active borrow, and that message is shown in the error
+  // toast. The button is hidden for the signed-in user.
+  const handleDeleteUser = async (member) => {
+    const { isConfirmed } = await Swal.fire({
+      title: `Delete "${member.name || member.email}"?`,
+      text: "This permanently removes the user, their wishlist and their notifications. Their borrow history stays as library records.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+    });
+    if (!isConfirmed) return;
+    setDeletingEmail(member.email);
+    try {
+      await axios.delete(`/admin/users/${encodeURIComponent(member.email)}`);
+      toast.success(`"${member.name || member.email}" deleted`);
+      refetch();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.error ||
+          "Could not delete the user. Please try again."
+      );
+    } finally {
+      setDeletingEmail(null);
     }
   };
 
@@ -125,7 +198,47 @@ const UsersAdmin = () => {
         </Box>{" "}
         Users
       </h1>
-      <Card elevation={4} className="max-w-4xl mx-auto mt-6 mb-6">
+      <div className="max-w-4xl mx-auto mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <TextField
+            type="text"
+            size="small"
+            value={userSearch}
+            onChange={(e) => {
+              setUserSearch(e.target.value);
+              setUsersPage(1);
+            }}
+            placeholder="Search by name or email"
+            sx={{ width: "100%", maxWidth: "24rem" }}
+          />
+          {userSearch && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setUserSearch("");
+                setUsersPage(1);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => setAddDialogOpen(true)}
+        >
+          Add User
+        </Button>
+      </div>
+      {users.length > 0 && (
+        <p className="max-w-4xl mx-auto mt-3 poppins">
+          Showing {rangeStart}–{rangeEnd} of {displayUsers.length} users
+          {userSearch.trim() !== "" && ` (${users.length} total)`}
+        </p>
+      )}
+      <Card elevation={4} className="max-w-4xl mx-auto mt-4 mb-6">
         <CardContent
           sx={{
             p: { xs: 2, sm: 4 },
@@ -134,11 +247,26 @@ const UsersAdmin = () => {
         >
           {users.length === 0 ? (
             <p className="text-center my-8 opacity-70">No users yet.</p>
+          ) : displayUsers.length === 0 ? (
+            <div className="text-center my-8">
+              <p className="text-xl font-bold">No users match your search</p>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  setUserSearch("");
+                  setUsersPage(1);
+                }}
+                sx={{ mt: 2 }}
+              >
+                Clear Search
+              </Button>
+            </div>
           ) : (
             <>
-              {/* Mobile: stacked cards (a 4-column table does not fit). */}
+              {/* Mobile: stacked cards (a 5-column table does not fit). */}
               <div className="md:hidden space-y-3">
-                {users.map((member) => {
+                {pageUsers.map((member) => {
                   const isSelf =
                     member.email?.toLowerCase() ===
                     user?.email?.toLowerCase();
@@ -192,6 +320,42 @@ const UsersAdmin = () => {
                           </MenuItem>
                         ))}
                       </Select>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={() =>
+                            setEditDialog({ open: true, user: member })
+                          }
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<HistoryIcon />}
+                          onClick={() =>
+                            setHistoryDialog({ open: true, user: member })
+                          }
+                        >
+                          History
+                        </Button>
+                        {!isSelf && (
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleDeleteUser(member)}
+                            disabled={deletingEmail === member.email}
+                          >
+                            {deletingEmail === member.email
+                              ? "Deleting..."
+                              : "Delete"}
+                          </Button>
+                        )}
+                      </div>
                     </Box>
                   );
                 })}
@@ -205,6 +369,7 @@ const UsersAdmin = () => {
                       <TableCell>Email</TableCell>
                       <TableCell>Member since</TableCell>
                       <TableCell>Role</TableCell>
+                      <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody
@@ -214,7 +379,7 @@ const UsersAdmin = () => {
                       },
                     }}
                   >
-                    {users.map((member) => {
+                    {pageUsers.map((member) => {
                       const isSelf =
                         member.email?.toLowerCase() ===
                         user?.email?.toLowerCase();
@@ -258,6 +423,47 @@ const UsersAdmin = () => {
                               ))}
                             </Select>
                           </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<EditIcon />}
+                                onClick={() =>
+                                  setEditDialog({ open: true, user: member })
+                                }
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<HistoryIcon />}
+                                onClick={() =>
+                                  setHistoryDialog({
+                                    open: true,
+                                    user: member,
+                                  })
+                                }
+                              >
+                                History
+                              </Button>
+                              {!isSelf && (
+                                <Button
+                                  variant="outlined"
+                                  color="error"
+                                  size="small"
+                                  startIcon={<DeleteIcon />}
+                                  onClick={() => handleDeleteUser(member)}
+                                  disabled={deletingEmail === member.email}
+                                >
+                                  {deletingEmail === member.email
+                                    ? "Deleting..."
+                                    : "Delete"}
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -268,6 +474,38 @@ const UsersAdmin = () => {
           )}
         </CardContent>
       </Card>
+      {totalPages > 1 && (
+        <Box
+          sx={{ display: "flex", justifyContent: "center", my: 3 }}
+          className="max-w-4xl mx-auto"
+        >
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(_event, page) => setUsersPage(page)}
+            color="primary"
+            aria-label="Users pages"
+          />
+        </Box>
+      )}
+
+      {/* Dialogs. */}
+      <AddUserDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onSaved={() => refetch()}
+      />
+      <EditUserDialog
+        open={editDialog.open}
+        onClose={() => setEditDialog({ open: false, user: null })}
+        user={editDialog.user}
+        onSaved={() => refetch()}
+      />
+      <UserHistoryDialog
+        open={historyDialog.open}
+        onClose={() => setHistoryDialog({ open: false, user: null })}
+        user={historyDialog.user}
+      />
     </DashboardLayout>
   );
 };

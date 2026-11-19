@@ -37,15 +37,20 @@ borrow books, and track borrowed books.
   policy, and a forgot-password page (Firebase password reset email)
 - Member profiles with roles (member, librarian, admin): a virtual
   membership card, editable name/phone/address, password and email change,
-  and an admin page to manage users and their roles
+  and an admin page to manage users and their roles — with search,
+  pagination, add/edit/delete users, and each user's borrow history
 - Admin/librarian dashboard (`/dashboard`, linked from the navbar instead
   of Add Book): a left sidebar navigates between Overview (library stats:
   books, copies, active/overdue borrows, users, out-of-stock books),
-  Books (a searchable book list with read-only stock, links to
+  Books (a searchable, paginated book list with read-only stock, links to
   edit/add books, and delete with confirmation — blocked while a book is
-  borrowed), Borrowed Books (all active borrows across users with overdue
-  highlighting), Categories (a table of thumbnails, names, and book
-  counts), and Users (admin only — manage users and their
+  borrowed), Borrowed Books (per-user tracking — who is holding how many
+  books and their earliest due date — plus all active borrows across
+  users with overdue highlighting; librarians can lend a book on a user's
+  behalf, change a return date up to 30 days out, and mark borrows
+  returned), Categories (a searchable, paginated table of thumbnails,
+  names, and book counts, with add/edit/delete — renaming a category
+  updates its books), and Users (admin only — manage users and their
   roles). The active section is kept in the URL (`?section=...`) so it
   survives refresh and can be shared. Book cards no longer carry an
   Update button — editing happens from the dashboard or the book
