@@ -18,6 +18,12 @@ borrow books, and track borrowed books.
   only
 - Borrow books with a return date, view borrowed books, and return them
   (max 3 books at a time); borrow history is kept on the profile page
+- Books can be borrowed for up to 5 days; the profile history and the
+  borrowed-books page warn about due-soon (amber) and overdue (red) books
+- Fully responsive design for phones, tablets, and desktops; book cards
+  are clickable through to the book details page
+- Public pages: About, Contact, FAQ, Terms of use, Privacy policy, Cookie
+  policy, and a forgot-password page (Firebase password reset email)
 - Member profiles with roles (member, librarian, admin): a virtual
   membership card, editable name/phone/address, password and email change,
   and an admin page to manage users and their roles

@@ -18,6 +18,8 @@ const NavBar = () => {
     { to: "/all-book", label: "All Book", show: true },
     { to: "/borrowed-book", label: "Borrowed Book", show: true },
     { to: "/admin/users", label: "Users", show: isAdmin },
+    { to: "/about", label: "About", show: true },
+    { to: "/faq", label: "FAQ", show: true },
   ].filter((link) => link.show);
 
   const navLinkClass = ({ isActive, isPending }) =>

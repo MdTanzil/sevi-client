@@ -7,6 +7,12 @@ import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import SafeImage from "../components/SafeImage";
+import {
+  MAX_BORROW_DAYS,
+  maxReturnDate,
+  minReturnDate,
+  validateReturnDate,
+} from "../utils/borrowDates";
 
 const MAX_ACTIVE_BORROWS = 3;
 const SingleBook = () => {
@@ -108,14 +114,22 @@ const SingleBook = () => {
       return;
     }
 
-    // jodi boita  borrow kora nah thake 
+    // jodi boita  borrow kora nah thake
     let retunDate = null;
     const { value: date } = await Swal.fire({
-      title: "select return date",
+      title: "Select return date",
+      text: `Books can be borrowed for up to ${MAX_BORROW_DAYS} days.`,
       input: "date",
+      // The picker itself only offers today .. today + 5 days, and the
+      // validator guards against a manually typed out-of-range date.
+      inputValidator: (value) => {
+        const check = validateReturnDate(value);
+        return check.valid ? undefined : check.message;
+      },
       didOpen: () => {
-        const today = new Date().toISOString();
-        Swal.getInput().min = today.split("T")[0];
+        const input = Swal.getInput();
+        input.min = minReturnDate();
+        input.max = maxReturnDate();
       },
     });
     if (date) {
@@ -161,8 +175,8 @@ const SingleBook = () => {
     //
   }
   return (
-    <div>
-      <h1 className="text-4xl text-center font-bold playfair">
+    <div className="px-2">
+      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
         <span className="text-secondary">Book</span> Details
       </h1>
       <div className="mt-5">
@@ -170,11 +184,11 @@ const SingleBook = () => {
           <div className="grid  card  rounded-box place-items-center">
             <SafeImage
               src={imageUrl}
-              className="rounded-lg h-[350px] w-[230px] object-cover"
+              className="rounded-lg h-[300px] w-[200px] sm:h-[350px] sm:w-[230px] object-cover"
               alt={name}
             />
             <p> {category}</p>
-            <div className="flex justify-around w-full">
+            <div className="flex flex-wrap justify-center gap-2 w-full">
               <button
                 onClick={handleBorrow}
                 disabled={quantity < 1 || atBorrowLimit}

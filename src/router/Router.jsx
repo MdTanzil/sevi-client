@@ -14,6 +14,11 @@ import Error from "../pages/Error";
 import Reading from "../pages/Reading";
 import Profile from "../pages/Profile";
 import UsersAdmin from "../pages/UsersAdmin";
+import About from "../pages/About";
+import Contact from "../pages/Contact";
+import Faq from "../pages/Faq";
+import Legal from "../pages/Legal";
+import ForgotPassword from "../pages/ForgotPassword";
 
 const router = createBrowserRouter([
   {
@@ -95,7 +100,31 @@ const router = createBrowserRouter([
             <UsersAdmin></UsersAdmin>
           </PrivateRoute>
         ),
-      }
+      },
+      {
+        path: "about",
+        element: <About></About>,
+      },
+      {
+        path: "contact",
+        element: <Contact></Contact>,
+      },
+      {
+        path: "faq",
+        element: <Faq></Faq>,
+      },
+      {
+        path: "terms",
+        element: <Legal section="terms"></Legal>,
+      },
+      {
+        path: "privacy",
+        element: <Legal section="privacy"></Legal>,
+      },
+      {
+        path: "cookies",
+        element: <Legal section="cookies"></Legal>,
+      },
     ],
   },
   {
@@ -105,6 +134,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register></Register>,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword></ForgotPassword>,
   },
 ]);
 

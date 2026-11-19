@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PropTypes } from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,6 +11,7 @@ import {
 import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
+import { getDueStatus } from "../utils/borrowDates";
 import toast from "react-hot-toast";
 
 const MAX_ACTIVE_BORROWS = 3;
@@ -47,6 +49,27 @@ const formatDate = (value) => {
     month: "short",
     year: "numeric",
   });
+};
+
+// Status badge for a history record: overdue books (active and past
+// their due date) show red, books due today or tomorrow show amber,
+// returned books show green. Returned books are never overdue.
+const DueBadge = ({ record }) => {
+  const status = getDueStatus(record);
+  if (status === "returned") {
+    return <span className="badge badge-success">Returned</span>;
+  }
+  if (status === "overdue") {
+    return <span className="badge badge-error text-white">Overdue</span>;
+  }
+  if (status === "due-soon") {
+    return <span className="badge badge-warning">Due soon</span>;
+  }
+  return <span className="badge badge-info">Borrowed</span>;
+};
+
+DueBadge.propTypes = {
+  record: PropTypes.object,
 };
 
 const Profile = () => {
@@ -204,13 +227,13 @@ const Profile = () => {
 
   return (
     <div className="mt-5">
-      <h1 className="text-4xl text-center font-bold playfair">
+      <h1 className="text-3xl sm:text-4xl text-center font-bold playfair">
         <span className="text-secondary">My</span> Profile
       </h1>
 
       {/* Virtual membership card */}
       <div className="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl max-w-2xl mx-auto mt-6">
-        <div className="card-body">
+        <div className="card-body p-5 sm:p-8">
           <div className="flex justify-between items-start gap-4">
             <div>
               <p className="text-xs tracking-[0.3em] opacity-80">
@@ -237,7 +260,7 @@ const Profile = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto mt-6">
         {/* Edit profile */}
         <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
+          <div className="card-body p-4 sm:p-8">
             <h2 className="card-title">Edit profile</h2>
             <form key={profile.email} onSubmit={handleUpdateProfile}>
               <div className="form-control">
@@ -297,7 +320,7 @@ const Profile = () => {
 
         {/* Account security: password + email */}
         <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
+          <div className="card-body p-4 sm:p-8">
             <h2 className="card-title">Change password</h2>
             {hasPasswordProvider ? (
               <form onSubmit={handleChangePassword}>
@@ -424,7 +447,7 @@ const Profile = () => {
 
       {/* Borrow history */}
       <div className="card bg-base-100 shadow-xl max-w-4xl mx-auto mt-6 mb-6">
-        <div className="card-body">
+        <div className="card-body p-4 sm:p-8">
           <h2 className="card-title">Borrow history</h2>
           {isHistoryLoading ? (
             <div className="flex justify-center my-8">
@@ -445,41 +468,87 @@ const Profile = () => {
               You have not borrowed any books yet.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra w-full">
-                <thead>
-                  <tr>
-                    <th>Book</th>
-                    <th>Borrowed</th>
-                    <th>Due</th>
-                    <th>Returned</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((record) => (
-                    <tr key={record._id}>
-                      <td>
+            <>
+              {/* Mobile: stacked cards (a 5-column table does not fit). */}
+              <div className="md:hidden space-y-3">
+                {history.map((record) => {
+                  const status = getDueStatus(record);
+                  const border =
+                    status === "overdue"
+                      ? "border-error"
+                      : status === "due-soon"
+                      ? "border-warning"
+                      : status === "returned"
+                      ? "border-success"
+                      : "border-base-300";
+                  return (
+                    <div
+                      key={record._id}
+                      className={`rounded-lg border border-l-4 ${border} p-3`}
+                    >
+                      <div className="flex justify-between items-start gap-2">
                         <div className="font-medium">{record.bookName}</div>
-                        <div className="text-sm opacity-70">
-                          by {record.author}
-                        </div>
-                      </td>
-                      <td>{record.borrowedDate || "—"}</td>
-                      <td>{record.retunDate || "—"}</td>
-                      <td>{record.returnedDate || "Not returned"}</td>
-                      <td>
-                        {record.status === "returned" ? (
-                          <span className="badge badge-success">Returned</span>
-                        ) : (
-                          <span className="badge badge-warning">Borrowed</span>
-                        )}
-                      </td>
+                        <DueBadge record={record} />
+                      </div>
+                      <div className="text-sm opacity-70">
+                        by {record.author}
+                      </div>
+                      <div className="text-sm mt-2 space-y-0.5">
+                        <p>Borrowed: {record.borrowedDate || "—"}</p>
+                        <p>Due: {record.retunDate || "—"}</p>
+                        <p>
+                          Returned: {record.returnedDate || "Not returned"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Desktop: the full table. Overdue rows are red,
+                  due-soon rows are amber. */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="table table-zebra w-full">
+                  <thead>
+                    <tr>
+                      <th>Book</th>
+                      <th>Borrowed</th>
+                      <th>Due</th>
+                      <th>Returned</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {history.map((record) => {
+                      const status = getDueStatus(record);
+                      const rowClass =
+                        status === "overdue"
+                          ? "bg-error/10"
+                          : status === "due-soon"
+                          ? "bg-warning/10"
+                          : "";
+                      return (
+                        <tr key={record._id} className={rowClass}>
+                          <td>
+                            <div className="font-medium">
+                              {record.bookName}
+                            </div>
+                            <div className="text-sm opacity-70">
+                              by {record.author}
+                            </div>
+                          </td>
+                          <td>{record.borrowedDate || "—"}</td>
+                          <td>{record.retunDate || "—"}</td>
+                          <td>{record.returnedDate || "Not returned"}</td>
+                          <td>
+                            <DueBadge record={record} />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

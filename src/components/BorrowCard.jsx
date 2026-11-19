@@ -6,6 +6,7 @@ import useAxios from "../hooks/useAxios";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
+import { getDueStatus } from "../utils/borrowDates";
 
 const BorrowCard = ({ data, refetch }) => {
   const axios = useAxios();
@@ -22,6 +23,10 @@ const BorrowCard = ({ data, refetch }) => {
     author,
     rating,
   } = data;
+
+  // Active borrows only reach this card, so the status is overdue,
+  // due-soon, or ok (the helper also handles returned/unknown safely).
+  const dueStatus = getDueStatus(data);
 
   const handleReturn = async () => {
     if (isReturning) return;
@@ -43,13 +48,31 @@ const BorrowCard = ({ data, refetch }) => {
     }
   };
   return (
-    <div className="p-1 shadow-lg bg-base-100 m-1 rounded-lg">
-      <figure className="flex justify-center">
+    <div
+      className={`p-1 shadow-lg hover:shadow-xl transition-shadow bg-base-100 m-1 rounded-xl border-2 ${
+        dueStatus === "overdue"
+          ? "border-error"
+          : dueStatus === "due-soon"
+          ? "border-warning"
+          : "border-transparent"
+      }`}
+    >
+      <figure className="flex justify-center relative">
         <SafeImage
           src={bookImage}
           alt={bookName}
           className="h-56 w-full object-cover rounded-t-lg"
         />
+        {dueStatus === "overdue" && (
+          <span className="badge badge-error text-white absolute top-3 right-3 shadow">
+            Overdue
+          </span>
+        )}
+        {dueStatus === "due-soon" && (
+          <span className="badge badge-warning absolute top-3 right-3 shadow">
+            Due soon
+          </span>
+        )}
       </figure>
       <div className="px-2 pb-2">
         <h2
