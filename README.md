@@ -60,7 +60,10 @@ borrow books, and track borrowed books.
 - Reading page for borrowed books
 - Authentication with Firebase (email/password and Google sign-in); library
   pages are protected routes. Login obtains a JWT cookie from the API, and
-  logout clears both the Firebase session and that cookie.
+  logout clears both the Firebase session and that cookie. If the JWT
+  expires while the user is still signed in (it lasts 10 hours), the app
+  silently mints a fresh one from the Firebase session and retries the
+  failed request, so data pages keep working without a manual re-login.
 
 ## Tech stack
 
