@@ -8,6 +8,10 @@
 // Books can be borrowed for at most this many days.
 export const MAX_BORROW_DAYS = 5;
 
+// How many days one loan extension adds to the return date. A member
+// may extend each loan once (the server enforces this too).
+export const EXTENSION_DAYS = 5;
+
 // "2026-11-19" -> local Date at midnight, or null when unparseable.
 export const parseDateOnly = (value) => {
   if (typeof value !== "string") return null;
@@ -98,3 +102,21 @@ export const validateReturnDate = (value, today = new Date()) => {
 export const minReturnDate = (today = new Date()) => toDateOnly(today);
 export const maxReturnDate = (today = new Date()) =>
   toDateOnly(addDays(today, MAX_BORROW_DAYS));
+
+// Whether the owner may still extend this loan: it must be active, not
+// overdue, and not already extended. The server enforces the same rules.
+export const canExtendBorrow = (record, today = new Date()) => {
+  if (!record || record.status === "returned" || record.extended) {
+    return false;
+  }
+  const status = getDueStatus(record, today);
+  return status === "ok" || status === "due-soon";
+};
+
+// The return date after a 5-day extension (YYYY-MM-DD), or null when
+// the record has no parseable return date.
+export const extendedReturnDate = (record) => {
+  const due = parseDateOnly(record?.retunDate);
+  if (!due) return null;
+  return toDateOnly(addDays(due, EXTENSION_DAYS));
+};

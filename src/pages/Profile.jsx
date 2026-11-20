@@ -28,7 +28,8 @@ import {
 import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
-import { getDueStatus } from "../utils/borrowDates";
+import { canExtendBorrow, getDueStatus } from "../utils/borrowDates";
+import ExtendBorrowButton from "../components/ExtendBorrowButton";
 import toast from "react-hot-toast";
 
 const MAX_ACTIVE_BORROWS = 3;
@@ -564,6 +565,23 @@ const Profile = () => {
                           Returned: {record.returnedDate || "Not returned"}
                         </p>
                       </div>
+                      {record.extended && (
+                        <Box sx={{ mt: 1.5 }}>
+                          <Chip
+                            label="Extended once"
+                            color="info"
+                            size="small"
+                          />
+                        </Box>
+                      )}
+                      {canExtendBorrow(record) && (
+                        <Box sx={{ mt: 1.5 }}>
+                          <ExtendBorrowButton
+                            record={record}
+                            onExtended={refetchHistory}
+                          />
+                        </Box>
+                      )}
                     </Box>
                   );
                 })}
@@ -579,6 +597,7 @@ const Profile = () => {
                       <TableCell>Due</TableCell>
                       <TableCell>Returned</TableCell>
                       <TableCell>Status</TableCell>
+                      <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -618,6 +637,20 @@ const Profile = () => {
                           </TableCell>
                           <TableCell>
                             <DueBadge record={record} />
+                          </TableCell>
+                          <TableCell>
+                            {record.extended ? (
+                              <Chip
+                                label="Extended once"
+                                color="info"
+                                size="small"
+                              />
+                            ) : (
+                              <ExtendBorrowButton
+                                record={record}
+                                onExtended={refetchHistory}
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       );

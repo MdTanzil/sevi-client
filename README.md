@@ -23,7 +23,9 @@ borrow books, and track borrowed books.
   between light and dark themes; the choice is saved in the browser
   (localStorage)
 - Borrow books with a return date, view borrowed books, and return them
-  (max 3 books at a time); borrow history is kept on the profile page
+  (max 3 books at a time); borrow history is kept on the profile page.
+  Each loan can be extended once by 5 days from the borrowed-books page
+  or the profile history (not for overdue books)
 - Wishlist: save books to a personal wishlist from the book details page
   (including out-of-stock books, whose Borrow button is disabled) and view
   them on the Wishlist page; when a wishlisted book is restocked, an

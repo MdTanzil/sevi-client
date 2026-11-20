@@ -14,6 +14,7 @@ import {
 import useAxios from "../hooks/useAxios";
 import toast from "react-hot-toast";
 import SafeImage from "./SafeImage";
+import ExtendBorrowButton from "./ExtendBorrowButton";
 import { getDueStatus } from "../utils/borrowDates";
 
 const BorrowCard = ({ data, refetch }) => {
@@ -124,9 +125,15 @@ const BorrowCard = ({ data, refetch }) => {
         <Typography align="center" fontWeight={500}>
           <span className=""> Return Date : {retunDate}</span>{" "}
         </Typography>
+        {data.extended && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+            <Chip label="Extended once" color="info" size="small" />
+          </Box>
+        )}
       </CardContent>
 
-      <CardActions sx={{ justifyContent: "center" }}>
+      <CardActions sx={{ justifyContent: "center", gap: 1 }}>
+        <ExtendBorrowButton record={data} onExtended={refetch} />
         <Button
           variant="contained"
           color="secondary"
