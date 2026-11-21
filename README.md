@@ -64,6 +64,9 @@ borrow books, and track borrowed books.
   expires while the user is still signed in (it lasts 10 hours), the app
   silently mints a fresh one from the Firebase session and retries the
   failed request, so data pages keep working without a manual re-login.
+  The login page offers two public demo accounts for visitors (Demo Admin
+  and Demo Member, both with password `Demo1234!`) — one click signs in,
+  no sign-up needed.
 
 ## Tech stack
 

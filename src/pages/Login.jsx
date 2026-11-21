@@ -9,9 +9,30 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CircularProgress from "@mui/material/CircularProgress";
+import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+
+// Public demo accounts so visitors can try Sevi without signing up.
+// Both exist in Firebase Auth and have server profiles (the admin one
+// was promoted to role "admin" via the API). Keep the passwords in sync
+// with the accounts if they ever change.
+const DEMO_ACCOUNTS = [
+  {
+    label: "Demo Admin",
+    description:
+      "Manage books, categories, borrows and users from the dashboard",
+    email: "admin@sevi-demo.com",
+    password: "Demo1234!",
+  },
+  {
+    label: "Demo Member",
+    description: "Borrow books, keep a wishlist, and track your history",
+    email: "member@sevi-demo.com",
+    password: "Demo1234!",
+  },
+];
 
 const Login = () => {
     const { signUpWithGoogle, login ,setUser } = useAuth();
@@ -20,15 +41,13 @@ const Login = () => {
     const axios = useAxios()
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleLogin = (event)=>{
-        event.preventDefault();
+    // Shared by the form and the one-click demo buttons.
+    const signInWithCredentials = (email, password) => {
         if (isSubmitting) return;
-        const email = event.target.email.value || ''
-        const password = event.target.password.value ||''
         setIsSubmitting(true);
         login(email, password)
           .then((userCredential) => {
-            // Signed up
+            // Signed in
             const user = userCredential.user;
             setUser(user)
             axios.post('/jwt',{email : email}).then(() => {})
@@ -44,8 +63,13 @@ const Login = () => {
             setIsSubmitting(false);
             // ..
           });
+    };
 
-
+    const handleLogin = (event)=>{
+        event.preventDefault();
+        const email = event.target.email.value || ''
+        const password = event.target.password.value ||''
+        signInWithCredentials(email, password);
     }
 
 
@@ -163,6 +187,55 @@ const Login = () => {
             >
               Sign in with Google
             </Button>
+
+            {/* Public demo accounts — one click signs in, no sign-up
+                needed. The credentials are shown so visitors can also
+                type them into the form above. */}
+            <Divider sx={{ mt: 3 }}>Try the demo</Divider>
+            <Typography
+              variant="body2"
+              align="center"
+              sx={{ mt: 1.5, opacity: 0.7 }}
+            >
+              No sign-up needed — explore Sevi with a demo account.
+            </Typography>
+            {DEMO_ACCOUNTS.map((account) => (
+              <Box
+                key={account.email}
+                sx={{
+                  mt: 2,
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  p: 2,
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {account.label}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                  {account.description}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 1, fontFamily: "monospace", fontSize: "0.85rem" }}
+                >
+                  {account.email} · {account.password}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  onClick={() =>
+                    signInWithCredentials(account.email, account.password)
+                  }
+                  disabled={isSubmitting}
+                  sx={{ mt: 1.5 }}
+                >
+                  Sign in as {account.label}
+                </Button>
+              </Box>
+            ))}
           </CardContent>
         </Card>
       </Box>
