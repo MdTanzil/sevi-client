@@ -31,6 +31,10 @@ borrow books, and track borrowed books.
   them on the Wishlist page; when a wishlisted book is restocked, an
   in-app notification appears on the bell icon in the navbar (unread count,
   mark one/all read, click to open the book)
+- Reviews: signed-in members leave one star rating (1–5) plus an optional
+  short review per book from the book details page, and edit or delete
+  their own review; the page shows the average member rating and the
+  review count, and anyone can read the reviews
 - Books can be borrowed for up to 5 days; the profile history and the
   borrowed-books page warn about due-soon (amber) and overdue (red) books
 - Fully responsive design for phones, tablets, and desktops; book cards
@@ -114,7 +118,7 @@ Firebase configuration is hardcoded in `src/config/firrebase.config.js`.
 
 ```
 src/
-├── components/   # Reusable UI: BookForm, SafeImage, Categories, Hero, NavBar, NotificationBell, WishlistCard, ...
+├── components/   # Reusable UI: BookForm, BookReviews, SafeImage, Categories, Hero, NavBar, NotificationBell, WishlistCard, ...
 ├── pages/        # Route pages: Home, AllBooks, SingleBook, AddBook, UpdateBook, Profile, UsersAdmin, Dashboard, Wishlist, ...
 ├── hooks/        # useAuth, useAxios (API client), useProfile (server profile + role helpers)
 ├── provider/     # AuthProvider (Firebase auth context)

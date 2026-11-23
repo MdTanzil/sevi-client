@@ -14,6 +14,7 @@ import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import SafeImage from "../components/SafeImage";
 import BookCard from "./BookCard";
+import BookReviews from "../components/BookReviews";
 import BorrowDialog from "../components/BorrowDialog";
 
 const MAX_ACTIVE_BORROWS = 3;
@@ -437,6 +438,7 @@ const SingleBook = () => {
           </Box>
         </Box>
       </Box>
+      <BookReviews bookId={id} />
       {similarBooks.length > 0 && (
         <Box sx={{ mt: 5 }}>
           <Typography
