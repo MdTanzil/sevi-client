@@ -5,11 +5,16 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
 import Pagination from "@mui/material/Pagination";
+import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { filterBooks } from "../utils/searchBooks";
+import { SORT_OPTIONS, sortBooks } from "../utils/sortBooks";
 
 const PAGE_SIZE = 12;
 const AllBooks = () => {
@@ -30,19 +35,23 @@ const AllBooks = () => {
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   // for display filter purposes
   const [filterActive, setFilterActive] = useState(false);
+  // sort order for the list below ("default" = the server's order)
+  const [sortBy, setSortBy] = useState("default");
 
-  // apply the search query and the available-only filter together
+  // apply the search query, the available-only filter and the sort
+  // together — filter first, then sort, then pagination slices below
   const displayData = useMemo(
-    () => filterBooks(data, searchTerm, filterActive),
-    [data, searchTerm, filterActive]
+    () => sortBooks(filterBooks(data, searchTerm, filterActive), sortBy),
+    [data, searchTerm, filterActive, sortBy]
   );
 
-  // Pagination applies AFTER the search/filter, across all matching
-  // books. The page resets to 1 whenever the search or filter changes.
+  // Pagination applies AFTER the search/filter/sort, across all matching
+  // books. The page resets to 1 whenever the search, filter or sort
+  // changes.
   const [page, setPage] = useState(1);
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, filterActive]);
+  }, [searchTerm, filterActive, sortBy]);
   // Coming back from the Add Book page (location.state.addpage) means a
   // new book may exist — refetch once. This must live in an effect: a
   // refetch during render fires again on every re-render.
@@ -91,6 +100,7 @@ const AllBooks = () => {
   const handleClearSearch = () => {
     setSearchTerm("");
     setFilterActive(false);
+    setSortBy("default");
   };
 
   return (
@@ -150,6 +160,21 @@ const AllBooks = () => {
             Clear
           </Button>
         )}
+        <FormControl size="small" sx={{ minWidth: "12rem" }}>
+          <InputLabel id="sort-by-label">Sort by</InputLabel>
+          <Select
+            labelId="sort-by-label"
+            value={sortBy}
+            label="Sort by"
+            onChange={(event) => setSortBy(event.target.value)}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
       {isLoading ? (
         // Skeleton cards in the exact grid the books will fill — the page

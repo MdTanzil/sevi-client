@@ -11,7 +11,9 @@ borrow books, and track borrowed books.
 - Browse books by category (12 categories on the home page)
 - Search books by title, author, or category — on the All Books page and from
   the home page hero search box; the All Books list is paginated (12 books
-  per page) with a "Showing X–Y of Z books" count
+  per page) with a "Showing X–Y of Z books" count, and can be sorted by
+  title (A–Z / Z–A), author (A–Z / Z–A), newest first, highest rated, or
+  available first
 - Book details with rating, description, and metadata (ISBN, publisher,
   published year, language, pages), plus a "Similar books" section with up
   to 4 other books from the same category
@@ -125,7 +127,7 @@ src/
 ├── router/       # Router.jsx, PrivateRoute.jsx
 ├── layouts/      # MainLayout
 ├── config/       # Firebase config
-└── utils/        # searchBooks.js (book search filter), borrowDates.js (due-date helpers)
+└── utils/        # searchBooks.js (book search filter), sortBooks.js (All Books sorting), borrowDates.js (due-date helpers)
 ```
 
 ## Deployment
