@@ -202,6 +202,12 @@ const SingleBook = () => {
         `Borrowed successfully — please return before ${retunDate}`
       );
       refetch();
+      // Borrowing cancels the borrower's reservation on the server, so
+      // the queue section must refresh too — otherwise it still shows
+      // the (now gone) reservation until the next page load.
+      queryClient.invalidateQueries({
+        queryKey: ["book-reservations", _id],
+      });
     } catch (error) {
       toast.error(
         error?.response?.data?.error ||
