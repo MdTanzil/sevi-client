@@ -37,6 +37,12 @@ borrow books, and track borrowed books.
   short review per book from the book details page, and edit or delete
   their own review; the page shows the average member rating and the
   review count, and anyone can read the reviews
+- Reservations: when a book is out of stock, signed-in members reserve it
+  from the book details page and join its hold queue (their place in the
+  queue is shown); when copies come back, the first people in the queue
+  get a notification in the navbar bell. Borrowing the book cancels the
+  borrower's reservation automatically, and reservations can be cancelled
+  from the book page or the profile page ("My reservations")
 - Books can be borrowed for up to 5 days; the profile history and the
   borrowed-books page warn about due-soon (amber) and overdue (red) books
 - Fully responsive design for phones, tablets, and desktops; book cards
@@ -120,7 +126,7 @@ Firebase configuration is hardcoded in `src/config/firrebase.config.js`.
 
 ```
 src/
-├── components/   # Reusable UI: BookForm, BookReviews, SafeImage, Categories, Hero, NavBar, NotificationBell, WishlistCard, ...
+├── components/   # Reusable UI: BookForm, BookReservations, BookReviews, SafeImage, Categories, Hero, NavBar, NotificationBell, WishlistCard, ...
 ├── pages/        # Route pages: Home, AllBooks, SingleBook, AddBook, UpdateBook, Profile, UsersAdmin, Dashboard, Wishlist, ...
 ├── hooks/        # useAuth, useAxios (API client), useProfile (server profile + role helpers)
 ├── provider/     # AuthProvider (Firebase auth context)

@@ -29,6 +29,7 @@ import useAxios from "../hooks/useAxios";
 import useAuth from "../hooks/useAuth";
 import useProfile from "../hooks/useProfile";
 import { canExtendBorrow, getDueStatus } from "../utils/borrowDates";
+import ConfirmDialog from "../components/ConfirmDialog";
 import ExtendBorrowButton from "../components/ExtendBorrowButton";
 import toast from "react-hot-toast";
 
@@ -121,6 +122,40 @@ const Profile = () => {
       return res.data;
     },
   });
+
+  // The caller's reservations (hold queue), newest first — each entry
+  // carries the book's current details and the queue position.
+  const {
+    data: myReservations = [],
+    isLoading: isReservationsLoading,
+    isError: isReservationsError,
+    refetch: refetchReservations,
+  } = useQuery({
+    queryKey: ["my-reservations"],
+    queryFn: async () => {
+      const res = await axios.get("/reservations");
+      return res.data;
+    },
+  });
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleCancelReservation = async () => {
+    if (!cancelTarget) return;
+    setIsCancelling(true);
+    try {
+      await axios.delete(
+        `/books/${cancelTarget.bookId}/reservations/${cancelTarget._id}`
+      );
+      toast.success("Your reservation was cancelled");
+      refetchReservations();
+      setCancelTarget(null);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   // Password changes and email changes go through Firebase, so they only
   // work for accounts that signed up with email and password. Google
@@ -662,6 +697,121 @@ const Profile = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* My reservations */}
+      <Card elevation={4} className="max-w-4xl mx-auto mt-6 mb-6">
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 4 },
+            "&:last-child": { pb: { xs: 2, sm: 4 } },
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            My reservations
+          </Typography>
+          {isReservationsLoading ? (
+            <div className="flex justify-center my-8">
+              <CircularProgress size={48} />
+            </div>
+          ) : isReservationsError ? (
+            <div className="text-center my-8">
+              <p className="font-bold">Could not load your reservations</p>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => refetchReservations()}
+                sx={{ mt: 2 }}
+              >
+                Try again
+              </Button>
+            </div>
+          ) : myReservations.length === 0 ? (
+            <p className="text-center my-8 opacity-70">
+              You have no reservations. When a book is out of stock,
+              reserve it from its details page to join the queue.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {myReservations.map((reservation) => (
+                <Box
+                  key={reservation._id}
+                  sx={{
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 2,
+                    p: 2,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: 1.5,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Box>
+                    <div className="font-medium">
+                      {reservation.book.name}
+                    </div>
+                    <div className="text-sm opacity-70">
+                      by {reservation.book.author}
+                    </div>
+                    <div className="text-sm mt-1">
+                      Reserved {formatDate(reservation.createdAt)}
+                    </div>
+                  </Box>
+                  <Box
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <Chip
+                      label={`#${reservation.position} in the queue`}
+                      color="primary"
+                      size="small"
+                    />
+                    {Number(reservation.book.quantity) >= 1 && (
+                      <Chip
+                        label="Available now"
+                        color="success"
+                        size="small"
+                      />
+                    )}
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() =>
+                        navigate(`/books-details/${reservation.bookId}`)
+                      }
+                    >
+                      View book
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
+                      onClick={() => setCancelTarget(reservation)}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <ConfirmDialog
+        open={!!cancelTarget}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={handleCancelReservation}
+        title="Cancel your reservation?"
+        message={
+          cancelTarget
+            ? `Your place in the queue for "${cancelTarget.book.name}" will be removed.`
+            : ""
+        }
+        confirmLabel="Cancel reservation"
+        confirmColor="error"
+        busy={isCancelling}
+        busyLabel="Cancelling..."
+      />
     </div>
   );
 };

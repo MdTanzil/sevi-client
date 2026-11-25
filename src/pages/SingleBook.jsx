@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import SafeImage from "../components/SafeImage";
 import BookCard from "./BookCard";
 import BookReviews from "../components/BookReviews";
+import BookReservations from "../components/BookReservations";
 import BorrowDialog from "../components/BorrowDialog";
 
 const MAX_ACTIVE_BORROWS = 3;
@@ -292,8 +293,9 @@ const SingleBook = () => {
                 color="error"
                 sx={{ mt: 0.5, textAlign: "center", px: 1 }}
               >
-                Out of stock — Borrow is unavailable right now. Add it to
-                your wishlist and we will notify you when it is back.
+                Out of stock — Borrow is unavailable right now. Reserve
+                it below to join the queue, or add it to your wishlist
+                and we will notify you when it is back.
               </Typography>
             )}
             {atBorrowLimit && (
@@ -439,6 +441,7 @@ const SingleBook = () => {
         </Box>
       </Box>
       <BookReviews bookId={id} />
+      <BookReservations bookId={id} quantity={quantity} />
       {similarBooks.length > 0 && (
         <Box sx={{ mt: 5 }}>
           <Typography

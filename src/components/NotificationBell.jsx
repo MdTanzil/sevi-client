@@ -17,9 +17,10 @@ import useAxios from "../hooks/useAxios";
 import toast from "react-hot-toast";
 
 // Bell icon in the navbar: shows the unread notification count and a
-// dropdown with the latest notifications (currently: restock alerts for
-// wishlisted books). Clicking a notification marks it read and opens the
-// book's details page.
+// dropdown with the latest notifications (restock alerts for wishlisted
+// books, and reservation alerts when a reserved book is back).
+// Clicking a notification marks it read and opens the book's details
+// page.
 const NotificationBell = () => {
   const axios = useAxios();
   const { user } = useAuth();
