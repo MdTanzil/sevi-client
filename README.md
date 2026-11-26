@@ -43,6 +43,9 @@ borrow books, and track borrowed books.
   get a notification in the navbar bell. Borrowing the book cancels the
   borrower's reservation automatically, and reservations can be cancelled
   from the book page or the profile page ("My reservations")
+- Due-date reminders: borrowed books that are due tomorrow or today, or
+  already overdue, show a notification in the navbar bell — one unread
+  reminder per book, removed once the book is returned
 - Books can be borrowed for up to 5 days; the profile history and the
   borrowed-books page warn about due-soon (amber) and overdue (red) books
 - Fully responsive design for phones, tablets, and desktops; book cards
