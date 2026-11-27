@@ -147,6 +147,7 @@ const SingleBook = () => {
     publishedYear,
     language,
     pages,
+    earliestReturnDate,
   } = book;
   const getRating = (rating) => {
     switch (rating) {
@@ -302,6 +303,15 @@ const SingleBook = () => {
                 Out of stock — Borrow is unavailable right now. Reserve
                 it below to join the queue, or add it to your wishlist
                 and we will notify you when it is back.
+              </Typography>
+            )}
+            {quantity < 1 && earliestReturnDate && (
+              <Typography
+                variant="caption"
+                sx={{ mt: 0.5, textAlign: "center", px: 1 }}
+              >
+                Expected back on {earliestReturnDate} — the earliest
+                borrowed copy returns then.
               </Typography>
             )}
             {atBorrowLimit && (

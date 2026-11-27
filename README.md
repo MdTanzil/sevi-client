@@ -42,7 +42,9 @@ borrow books, and track borrowed books.
   queue is shown); when copies come back, the first people in the queue
   get a notification in the navbar bell. Borrowing the book cancels the
   borrower's reservation automatically, and reservations can be cancelled
-  from the book page or the profile page ("My reservations")
+  from the book page or the profile page ("My reservations"). An
+  out-of-stock book also shows its expected return date ("Expected back
+  on ...") — the soonest return date among its active borrows
 - Due-date reminders: borrowed books that are due tomorrow or today, or
   already overdue, show a notification in the navbar bell — one unread
   reminder per book, removed once the book is returned
